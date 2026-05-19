@@ -297,6 +297,8 @@ body {
 }
 
 .form-section[hidden],
+.stepper__item[hidden],
+.procedure-card[hidden],
 #next-step-button[hidden],
 #submit-button[hidden] {
     display: none !important;

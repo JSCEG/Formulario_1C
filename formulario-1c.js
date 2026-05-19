@@ -1,6 +1,6 @@
 (function () {
     const SHEET_READ_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPZHXFcFuVRHH2gV5lyTSR3BKyZ3C1KyWVDLs5U_NBnvmqecRKa1-BVXNxCy4UkTQaH1HamMW_c7Q_/pub?gid=1770165044&single=true&output=tsv';
-    const APPS_SCRIPT_URL = '';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwO8XoBc69NHZWPviaSOq15PFyERfhb3jHQGzM8SdV3LkGMUd_AptlTVLv-E4gqCnpTKg/exec';
     const LOCAL_DUPLICATE_KEY = 'formulario1c.submissions';
     const DUPLICATE_COLUMN_INDEX = 38;
     const FALLBACK_DUPLICATE_INDEX = 1;
@@ -8,41 +8,76 @@
     const PROJECT_HEADER_NAMES = ['nombre del proyecto'];
     const TIMESTAMP_HEADER_NAMES = ['marca temporal', 'timestamp'];
     const REPORT_DATE_HEADER_NAMES = ['fecha'];
+    const PROJECT_URL_PARAM = 'proyecto';
+    const TRACKING_KEY_URL_PARAM = 'clave';
 
-    const statusOptions = [
-        '',
-        'Pendiente',
-        'Por ingresar',
-        'En elaboracion',
-        'En proceso',
-        'Entregado',
-        'Firmado',
-        'Aprobado',
-        'Aprobada',
-        'Liberado',
-        'Contratados',
-        'Realizada',
-        'Detenido',
-        'No aplica',
-        'Otro'
-    ];
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_PROGRESS = 'progress';
+    const STATUS_ISSUE = 'issue';
+
+    const statusOptionSets = {
+        guarantees: statusOptions(
+            option('Entregado', STATUS_COMPLETE),
+            option('Pendiente', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        interconnection: statusOptions(
+            option('Firmado', STATUS_COMPLETE),
+            option('Pendiente', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        misse: statusOptions(
+            option('Aprobada', STATUS_COMPLETE),
+            option('En elaboracion', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        consultation: statusOptions(
+            option('Realizada', STATUS_COMPLETE),
+            option('En proceso', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        mia: statusOptions(
+            option('Aprobada', STATUS_COMPLETE),
+            option('En proceso', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        etj: statusOptions(
+            option('Aprobado', STATUS_COMPLETE),
+            option('En elaboracion', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        defaultTerritory: statusOptions(
+            option('Liberado', STATUS_COMPLETE),
+            option('En proceso', STATUS_PROGRESS),
+            option('Otro', STATUS_ISSUE)
+        ),
+        municipality: statusOptions(
+            option('Liberado', STATUS_COMPLETE),
+            option('En proceso', STATUS_PROGRESS),
+            option('Otros', STATUS_ISSUE)
+        ),
+        easement: statusOptions(
+            option('Liberado', STATUS_COMPLETE),
+            option('En proceso', STATUS_PROGRESS),
+            option('Otros', STATUS_ISSUE)
+        )
+    };
 
     const miaTypeOptions = [
         '',
         'MIA',
+        'MIA/ETJ',
         'MIA Poligono principal',
-        'MIA Linea de Transmision',
         'MIA Poligono principal + Linea de Transmision',
-        'Otro'
+        'MIA Linea de Transmision',
+        'MIA/ETJ Linea de Transmision'
     ];
 
     const etjTypeOptions = [
         '',
-        'ETJ',
-        'ETJ Poligono Principal',
         'ETJ Linea de Transmision',
-        'ETJ Poligono Principal + Linea de Transmision',
-        'Otro'
+        'ETJ Poligono principal',
+        'ETJ Poligono Principal + Linea de Transmision'
     ];
 
     const technologyOptions = [
@@ -76,12 +111,12 @@
             description: 'Tramites base vinculados a garantias, interconexion, MISSE y componente ambiental.',
             type: 'procedures',
             procedures: [
-                procedure('guarantees', 'Pago de garantias', 3, 4, 40),
-                procedure('interconnection', 'Contrato de interconexion', 5, 6, 41),
-                procedure('misse', 'Tramite MISSE', 7, 8, 42),
-                procedure('consultation', 'Consulta previa libre e informada', 9, 10, 43),
-                procedure('mia', 'Manifestacion de Impacto Ambiental', 12, 13, 44, { typeColumn: 11, typeLabel: 'Tipo de MIA', typeOptions: miaTypeOptions }),
-                procedure('etj', 'Estudio Tecnico Justificativo', 15, 16, 45, { typeColumn: 14, typeLabel: 'Tipo de ETJ', typeOptions: etjTypeOptions })
+                procedure('guarantees', 'Pago de garantias', 3, 4, 40, { statusOptions: statusOptionSets.guarantees, statusLabel: 'Cual es el estatus del pago de garantias?' }),
+                procedure('interconnection', 'Contrato de interconexion', 5, 6, 41, { statusOptions: statusOptionSets.interconnection, statusLabel: 'Estatus de la firma del contrato de interconexion' }),
+                procedure('misse', 'MISSE/EVIS', 7, 8, 42, { statusOptions: statusOptionSets.misse, statusLabel: 'Estatus del tramite MISSE/EVIS' }),
+                procedure('consultation', 'Consulta previa libre e informada', 9, 10, 43, { statusOptions: statusOptionSets.consultation, statusLabel: 'Estatus de la consulta previa libre e informada' }),
+                procedure('mia', 'Manifestacion de Impacto Ambiental', 12, 13, 44, { statusOptions: statusOptionSets.mia, statusLabel: 'Estatus del tramite de la Manifestacion de Impacto Ambiental', typeColumn: 11, typeLabel: 'Tipo de MIA', typeOptions: miaTypeOptions }),
+                procedure('etj', 'Estudio Tecnico Justificativo', 15, 16, 45, { statusOptions: statusOptionSets.etj, statusLabel: 'Estatus del tramite del Estudio Tecnico Justificativo', typeColumn: 14, typeLabel: 'Tipo de ETJ', typeOptions: etjTypeOptions })
             ]
         },
         {
@@ -104,8 +139,8 @@
             description: 'Ultima seccion para tramites municipales, servidumbres, derecho de via, obras de refuerzo y procura.',
             type: 'procedures',
             procedures: [
-                procedure('municipality', 'Tramites municipales', 29, 30, 52),
-                procedure('easement', 'Servidumbre de paso', 31, 32, 53),
+                procedure('municipality', 'Tramites municipales', 29, 30, 52, { statusOptions: statusOptionSets.municipality }),
+                procedure('easement', 'Servidumbre de paso', 31, 32, 53, { statusOptions: statusOptionSets.easement }),
                 procedure('right-of-way', 'Derecho de via', 33, 34, 54),
                 procedure('reinforcement-works', 'Obras de refuerzo', 35, 36, 55),
                 procedure('procurement', 'Avances en procura', 37, 38, 56)
@@ -121,6 +156,11 @@
         hasAppsScript: false,
         existingRows: 0,
         sheetRecords: [],
+        latestProjectRecord: null,
+        trackingProjectName: '',
+        trackingKey: '',
+        trackingAccessValid: false,
+        formLocked: false,
         currentStep: 0
     };
 
@@ -135,7 +175,15 @@
     init();
 
     function procedure(id, title, statusColumn, detailColumn, summaryColumn, extra) {
-        return Object.assign({ id, title, statusColumn, detailColumn, summaryColumn }, extra || {});
+        return Object.assign({ id, title, statusColumn, detailColumn, summaryColumn, statusOptions: statusOptionSets.defaultTerritory }, extra || {});
+    }
+
+    function statusOptions() {
+        return [option('', '')].concat(Array.from(arguments));
+    }
+
+    function option(label, mode) {
+        return { label, value: label, mode };
     }
 
     function init() {
@@ -146,6 +194,7 @@
         renderStepper();
         showStep(0);
         attachEvents();
+        configureTrackingLink();
         loadDuplicateKeys();
     }
 
@@ -189,9 +238,9 @@
                 <h4 class="procedure-card__title">${escapeHtml(item.title)}</h4>
                 <div class="procedure-card__grid">
                     ${item.typeColumn ? renderField({ key: `${item.id}Type`, label: item.typeLabel, control: 'select', required: true, options: item.typeOptions, column: item.typeColumn, hint: 'Selecciona el tipo tramitado para este proyecto.' }) : ''}
-                    ${renderField({ key: `${item.id}Status`, label: 'Estatus del tramite', control: 'select', required: true, options: statusOptions, column: item.statusColumn, procedureId: item.id, hint: 'Selecciona el avance reportado al momento del llenado.' })}
-                    ${renderField({ key: `${item.id}Detail`, label: 'Detalle si esta detenido u ocupa aclaracion', control: 'textarea', required: false, minLength: 10, column: item.detailColumn, procedureId: item.id, conditionalOn: `${item.id}Status`, hint: 'Se vuelve obligatorio si el estatus es Detenido u Otro.' })}
-                    ${renderField({ key: `${item.id}CurrentSituation`, label: 'Situacion actual del tramite', control: 'textarea', required: true, minLength: 10, column: item.summaryColumn, hint: 'Resume el estado actual con informacion puntual.' })}
+                    ${renderField({ key: `${item.id}Status`, label: item.statusLabel || 'Estatus del tramite', control: 'select', required: true, options: item.statusOptions, column: item.statusColumn, procedureId: item.id, hint: 'Selecciona el avance reportado al momento del llenado.' })}
+                    ${renderField({ key: `${item.id}CurrentSituation`, label: 'Describe la situacion actual en que se encuentra este tramite', control: 'textarea', required: false, minLength: 10, column: item.summaryColumn, procedureId: item.id, conditionalOn: `${item.id}Status`, conditionalMode: STATUS_PROGRESS, full: true, hint: 'Se vuelve obligatorio cuando el tramite esta pendiente, en elaboracion o en proceso.' })}
+                    ${renderField({ key: `${item.id}Detail`, label: 'En caso de que este tramite se encuentre detenido, describe la situacion', control: 'textarea', required: false, minLength: 10, column: item.detailColumn, procedureId: item.id, conditionalOn: `${item.id}Status`, conditionalMode: STATUS_ISSUE, full: true, hint: 'Se vuelve obligatorio cuando el estatus es Otro u Otros.' })}
                 </div>
             </article>
         `;
@@ -204,7 +253,7 @@
         }
 
         return `
-            <div class="${className.join(' ')}" data-field-key="${field.key}" ${field.conditionalOn ? `data-conditional-on="${field.conditionalOn}"` : ''}>
+            <div class="${className.join(' ')}" data-field-key="${field.key}" ${field.conditionalOn ? `data-conditional-on="${field.conditionalOn}"` : ''} ${field.conditionalMode ? `data-conditional-mode="${field.conditionalMode}"` : ''}>
                 <label class="field__label" for="${field.key}">
                     <span>${escapeHtml(field.label)}</span>
                     ${field.required ? '<span class="field__required">*</span>' : ''}
@@ -219,7 +268,10 @@
         if (field.control === 'select') {
             return `
                 <select class="field__select" id="${field.key}" name="${field.key}" data-column="${field.column}" ${field.required ? 'required' : ''}>
-                    ${field.options.map((option) => `<option value="${escapeAttribute(option)}">${escapeHtml(option || 'Selecciona una opcion')}</option>`).join('')}
+                    ${field.options.map((item) => {
+                        const normalizedOption = normalizeOption(item);
+                        return `<option value="${escapeAttribute(normalizedOption.value)}" data-mode="${escapeAttribute(normalizedOption.mode)}">${escapeHtml(normalizedOption.label || 'Selecciona una opcion')}</option>`;
+                    }).join('')}
                 </select>
             `;
         }
@@ -242,6 +294,80 @@
         form.addEventListener('submit', handleSubmit);
         prevStepButton.addEventListener('click', goToPreviousStep);
         nextStepButton.addEventListener('click', goToNextStep);
+    }
+
+    function configureTrackingLink() {
+        const params = new URLSearchParams(window.location.search);
+        state.trackingProjectName = (params.get(PROJECT_URL_PARAM) || '').trim();
+        state.trackingKey = (params.get(TRACKING_KEY_URL_PARAM) || '').trim();
+
+        const projectField = document.getElementById('projectName');
+        if (state.trackingProjectName && projectField instanceof HTMLInputElement) {
+            projectField.value = state.trackingProjectName;
+            projectField.readOnly = true;
+            projectField.removeAttribute('list');
+        }
+
+        if (!state.trackingProjectName || !state.trackingKey) {
+            state.trackingAccessValid = false;
+            setFormLocked(true);
+            setGlobalMessage('Liga de seguimiento no valida. Abre el formulario desde la liga enviada para tu proyecto.', 'error');
+            return;
+        }
+
+        state.trackingAccessValid = true;
+        setGlobalMessage('Validando liga de seguimiento...', 'warning');
+        validateTrackingAccess();
+    }
+
+    async function validateTrackingAccess() {
+        if (!state.hasAppsScript) {
+            return;
+        }
+
+        try {
+            const url = `${APPS_SCRIPT_URL}?action=validate&projectName=${encodeURIComponent(state.trackingProjectName)}&trackingKey=${encodeURIComponent(state.trackingKey)}&cacheBust=${Date.now()}`;
+            const response = await fetch(url, { cache: 'no-store' });
+            const data = await response.json();
+            if (!response.ok || !data.ok || data.validProjectLink !== true) {
+                throw new Error('La liga de seguimiento no es valida para este proyecto.');
+            }
+
+            state.trackingAccessValid = true;
+            setFormLocked(false);
+            setGlobalMessage('', 'info');
+            applyProjectContext();
+            validateDuplicateField();
+        } catch (error) {
+            state.trackingAccessValid = false;
+            setFormLocked(true);
+            setGlobalMessage(error.message || 'La liga de seguimiento no es valida.', 'error');
+        }
+    }
+
+    function restoreTrackingProjectField() {
+        const projectField = document.getElementById('projectName');
+        if (state.trackingProjectName && projectField instanceof HTMLInputElement) {
+            projectField.value = state.trackingProjectName;
+            projectField.readOnly = true;
+            projectField.removeAttribute('list');
+        }
+    }
+
+    function setFormLocked(locked) {
+        state.formLocked = locked;
+        Array.from(form.querySelectorAll('input, select, textarea, button')).forEach((field) => {
+            if (field.id === 'projectName' && state.trackingProjectName) {
+                field.disabled = false;
+                field.readOnly = true;
+                return;
+            }
+
+            if (field.id === 'prev-step-button' || field.id === 'next-step-button' || field.id === 'submit-button' || field.dataset.column) {
+                field.disabled = locked;
+            }
+        });
+        updateNavigationState();
     }
 
     async function loadDuplicateKeys() {
@@ -274,6 +400,7 @@
 
             state.loadingSheet = false;
             renderProjectOptions();
+            applyProjectContext();
             validateDuplicateField();
         } catch (error) {
             state.loadingSheet = false;
@@ -293,9 +420,18 @@
             return {
                 projectName,
                 timestamp,
-                reportDate
+                reportDate,
+                rowValues: ensureRowLength(row)
             };
         }).filter((record) => record.projectName);
+    }
+
+    function ensureRowLength(row) {
+        const values = row.slice(0, TOTAL_COLUMNS);
+        while (values.length < TOTAL_COLUMNS) {
+            values.push('');
+        }
+        return values;
     }
 
     function initializeDates() {
@@ -312,7 +448,7 @@
         }
 
         stepper.innerHTML = sections.map((section, index) => `
-            <button type="button" class="stepper__item" data-step="${index}" aria-current="${index === state.currentStep ? 'step' : 'false'}">
+            <button type="button" class="stepper__item" data-step="${index}" aria-current="${index === state.currentStep ? 'step' : 'false'}" ${isSectionAvailable(index) ? '' : 'hidden'}>
                 <span>${index + 1}</span>
                 ${escapeHtml(section.title)}
             </button>
@@ -329,7 +465,8 @@
     }
 
     function showStep(index) {
-        state.currentStep = Math.max(0, Math.min(index, sections.length - 1));
+        const boundedIndex = Math.max(0, Math.min(index, sections.length - 1));
+        state.currentStep = isSectionAvailable(boundedIndex) ? boundedIndex : findNextVisibleStep(boundedIndex);
 
         sections.forEach((section, sectionIndex) => {
             const sectionNode = document.getElementById(`section-${section.id}`);
@@ -350,7 +487,7 @@
     }
 
     function goToPreviousStep() {
-        showStep(state.currentStep - 1);
+        showStep(findPreviousVisibleStep(state.currentStep - 1));
     }
 
     function goToNextStep() {
@@ -360,7 +497,7 @@
             return;
         }
 
-        showStep(state.currentStep + 1);
+        showStep(findNextVisibleStep(state.currentStep + 1));
     }
 
     function updateNavigationState() {
@@ -369,8 +506,9 @@
         }
 
         const isFirstStep = state.currentStep === 0;
-        const isLastStep = state.currentStep === sections.length - 1;
-        prevStepButton.disabled = isFirstStep || state.isSubmitting;
+        const nextStep = findNextVisibleStep(state.currentStep + 1);
+        const isLastStep = nextStep <= state.currentStep;
+        prevStepButton.disabled = state.formLocked || isFirstStep || state.isSubmitting;
         nextStepButton.hidden = isLastStep;
         submitButton.hidden = !isLastStep;
         updateSubmitState();
@@ -510,37 +648,241 @@
         }
 
         if (field.id === 'projectName' || field.id === 'reportDate') {
+            if (field.id === 'projectName') {
+                applyProjectContext();
+            }
             validateDuplicateField();
         }
 
         if (field.id.endsWith('Status')) {
-            toggleConditionalDetail(field.id, field.value);
+            toggleConditionalFields(field.id);
         }
 
         validateField(field);
     }
 
-    function toggleConditionalDetail(statusFieldId, value) {
-        const detailKey = statusFieldId.replace('Status', 'Detail');
-        const wrapper = sectionsContainer.querySelector(`[data-field-key="${detailKey}"]`);
-        const detailField = document.getElementById(detailKey);
-        if (!wrapper || !detailField) {
+    function toggleConditionalFields(statusFieldId) {
+        const statusField = document.getElementById(statusFieldId);
+        if (!(statusField instanceof HTMLSelectElement)) {
             return;
         }
 
-        const needsDetail = requiresDetail(value);
-        detailField.required = needsDetail;
-        detailField.disabled = !needsDetail;
-        wrapper.classList.toggle('is-disabled', !needsDetail);
-        if (!needsDetail) {
-            detailField.value = '';
-            clearFieldError(detailField);
+        const selectedOption = statusField.selectedOptions[0];
+        const selectedMode = selectedOption ? selectedOption.dataset.mode : '';
+        const fields = sectionsContainer.querySelectorAll(`[data-conditional-on="${statusFieldId}"]`);
+
+        fields.forEach((wrapper) => {
+            const field = wrapper.querySelector('textarea, input, select');
+            if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+                return;
+            }
+
+            const isActive = wrapper.dataset.conditionalMode === selectedMode;
+            field.required = isActive;
+            field.disabled = !isActive;
+            wrapper.hidden = !isActive;
+            wrapper.classList.toggle('is-disabled', !isActive);
+            if (!isActive) {
+                field.value = '';
+                clearFieldError(field);
+            }
+        });
+    }
+
+    function normalizeOption(item) {
+        if (item && typeof item === 'object') {
+            return {
+                label: item.label || item.value || '',
+                value: item.value || item.label || '',
+                mode: item.mode || ''
+            };
+        }
+
+        return {
+            label: item || '',
+            value: item || '',
+            mode: ''
+        };
+    }
+
+    function applyProjectContext() {
+        const projectField = document.getElementById('projectName');
+        const projectKey = normalize(projectField ? projectField.value : '');
+        state.latestProjectRecord = findLatestProjectRecord(projectKey);
+
+        clearProcedureValues();
+        resetProcedureVisibility();
+        prefillProjectValues(state.latestProjectRecord);
+
+        if (!state.latestProjectRecord) {
+            resetConditionalDetails();
+            renderStepper();
+            showStep(Math.min(state.currentStep, sections.length - 1));
+            return;
+        }
+
+        sections.forEach((section) => {
+            if (section.type !== 'procedures') {
+                return;
+            }
+
+            section.procedures.forEach((item) => {
+                const status = readRecordColumn(state.latestProjectRecord, item.statusColumn);
+                const mode = getStatusMode(item, status);
+                const card = sectionsContainer.querySelector(`[data-procedure-id="${item.id}"]`);
+                if (!card) {
+                    return;
+                }
+
+                const isComplete = mode === STATUS_COMPLETE;
+                setProcedureCardActive(card, !isComplete);
+                if (!isComplete) {
+                    prefillProcedure(item, state.latestProjectRecord);
+                }
+            });
+        });
+
+        resetConditionalDetails();
+        renderStepper();
+        showStep(findNextVisibleStep(0));
+    }
+
+    function findLatestProjectRecord(projectKey) {
+        if (!projectKey) {
+            return null;
+        }
+
+        for (let index = state.sheetRecords.length - 1; index >= 0; index -= 1) {
+            const record = state.sheetRecords[index];
+            if (normalize(record.projectName) === projectKey) {
+                return record;
+            }
+        }
+
+        return null;
+    }
+
+    function resetProcedureVisibility() {
+        sectionsContainer.querySelectorAll('.procedure-card').forEach((card) => {
+            setProcedureCardActive(card, true);
+        });
+    }
+
+    function clearProcedureValues() {
+        sections.forEach((section) => {
+            if (section.type !== 'procedures') {
+                return;
+            }
+
+            section.procedures.forEach((item) => {
+                [`${item.id}Type`, `${item.id}Status`, `${item.id}CurrentSituation`, `${item.id}Detail`].forEach((fieldId) => {
+                    const field = document.getElementById(fieldId);
+                    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
+                        field.value = '';
+                        clearFieldError(field);
+                    }
+                });
+            });
+        });
+    }
+
+    function setProcedureCardActive(card, active) {
+        card.hidden = !active;
+        card.querySelectorAll('input, select, textarea').forEach((field) => {
+            field.disabled = !active;
+            if (!active) {
+                clearFieldError(field);
+            }
+        });
+    }
+
+    function prefillProjectValues(record) {
+        const technologyField = document.getElementById('technology');
+        if (!record || !(technologyField instanceof HTMLSelectElement)) {
+            return;
+        }
+
+        const technology = readRecordColumn(record, 57);
+        if (technology && !technologyField.value) {
+            setFieldValue(technologyField, technology);
         }
     }
 
-    function requiresDetail(statusValue) {
-        const normalized = normalize(statusValue);
-        return normalized === 'detenido' || normalized === 'otro';
+    function prefillProcedure(item, record) {
+        if (!record) {
+            return;
+        }
+
+        if (item.typeColumn) {
+            const typeField = document.getElementById(`${item.id}Type`);
+            const typeValue = readRecordColumn(record, item.typeColumn);
+            if (typeField && typeValue) {
+                setFieldValue(typeField, typeValue);
+            }
+        }
+
+        const statusField = document.getElementById(`${item.id}Status`);
+        const statusValue = readRecordColumn(record, item.statusColumn);
+        if (statusField && statusValue) {
+            setFieldValue(statusField, statusValue);
+        }
+    }
+
+    function setFieldValue(field, value) {
+        const hasOption = !(field instanceof HTMLSelectElement) || Array.from(field.options).some((optionNode) => optionNode.value === value);
+        if (hasOption) {
+            field.value = value;
+        }
+    }
+
+    function readRecordColumn(record, column) {
+        if (!record || !Array.isArray(record.rowValues) || !column) {
+            return '';
+        }
+
+        return String(record.rowValues[column - 1] || '').trim();
+    }
+
+    function getStatusMode(item, value) {
+        const normalized = normalize(value);
+        const match = (item.statusOptions || []).find((statusOption) => normalize(statusOption.value) === normalized);
+        return match ? match.mode : '';
+    }
+
+    function findNextVisibleStep(startIndex) {
+        for (let index = Math.max(0, startIndex); index < sections.length; index += 1) {
+            if (isSectionAvailable(index)) {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    function findPreviousVisibleStep(startIndex) {
+        for (let index = Math.min(startIndex, sections.length - 1); index >= 0; index -= 1) {
+            if (isSectionAvailable(index)) {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    function isSectionAvailable(index) {
+        const section = sections[index];
+        if (!section) {
+            return false;
+        }
+
+        if (section.type === 'general') {
+            return true;
+        }
+
+        return section.procedures.some((item) => {
+            const card = sectionsContainer.querySelector(`[data-procedure-id="${item.id}"]`);
+            return card && !card.hidden;
+        });
     }
 
     function validateDuplicateField() {
@@ -568,6 +910,11 @@
 
     function validateField(field) {
         if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) {
+            return true;
+        }
+
+        if (field.disabled || isFieldInHiddenSection(field)) {
+            clearFieldError(field);
             return true;
         }
 
@@ -648,17 +995,22 @@
 
     function updateSubmitState() {
         const duplicateError = form.querySelector('[data-field-key="projectName"].is-invalid');
-        submitButton.disabled = state.isSubmitting || Boolean(duplicateError) || state.currentStep !== sections.length - 1;
+        submitButton.disabled = state.formLocked || state.isSubmitting || Boolean(duplicateError) || submitButton.hidden;
         if (nextStepButton) {
-            nextStepButton.disabled = state.isSubmitting;
+            nextStepButton.disabled = state.formLocked || state.isSubmitting;
         }
         if (prevStepButton) {
-            prevStepButton.disabled = state.isSubmitting || state.currentStep === 0;
+            prevStepButton.disabled = state.formLocked || state.isSubmitting || state.currentStep === 0;
         }
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
+
+        if (!state.trackingAccessValid) {
+            setGlobalMessage('Liga de seguimiento no valida. No es posible guardar el registro.', 'error');
+            return;
+        }
 
         if (!validateForm()) {
             setGlobalMessage('Revisa los campos marcados antes de enviar el formulario.', 'error');
@@ -695,14 +1047,18 @@
             storeLocalDuplicateKey(duplicateKey);
             state.duplicateKeys.add(duplicateKey);
             state.projectNames.add(normalize(payload.projectName));
-            state.sheetRecords.unshift({
+            state.sheetRecords.push({
                 projectName: payload.projectName,
                 timestamp: new Date().toLocaleString('es-MX'),
-                reportDate: payload.reportDate || ''
+                reportDate: payload.reportDate || '',
+                rowValues: payload.rowValues
             });
             state.existingRows += 1;
             form.reset();
+            state.latestProjectRecord = null;
+            resetProcedureVisibility();
             initializeDates();
+            restoreTrackingProjectField();
             resetConditionalDetails();
             renderProjectOptions();
             showStep(0);
@@ -718,12 +1074,14 @@
     }
 
     function buildPayload() {
-        const values = Array(TOTAL_COLUMNS).fill('');
+        const values = state.latestProjectRecord && Array.isArray(state.latestProjectRecord.rowValues)
+            ? ensureRowLength(state.latestProjectRecord.rowValues)
+            : Array(TOTAL_COLUMNS).fill('');
         const fields = Array.from(form.querySelectorAll('input, select, textarea'));
 
         fields.forEach((field) => {
             const column = Number(field.dataset.column);
-            if (!column) {
+            if (!column || field.disabled || isFieldInHiddenSection(field)) {
                 return;
             }
             values[column - 1] = field.value.trim();
@@ -736,6 +1094,7 @@
             submittedAtDisplay: formatDateTime(new Date()),
             projectName,
             reportDate,
+            trackingKey: state.trackingKey,
             duplicateKey: buildReportKey(projectName, reportDate),
             rowValues: values
         };
@@ -803,6 +1162,12 @@
         }
     }
 
+    function isFieldInHiddenSection(field) {
+        const section = field.closest('.form-section');
+        const card = field.closest('.procedure-card');
+        return Boolean((section && section.hidden) || (card && card.hidden));
+    }
+
     function normalize(value) {
         return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
     }
@@ -812,7 +1177,7 @@
             if (section.type !== 'procedures') {
                 return;
             }
-            section.procedures.forEach((item) => toggleConditionalDetail(`${item.id}Status`, ''));
+            section.procedures.forEach((item) => toggleConditionalFields(`${item.id}Status`));
         });
     }
 
