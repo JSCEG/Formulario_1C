@@ -319,12 +319,31 @@
             state.trackingAccessValid = false;
             setFormLocked(true);
             setGlobalMessage('Liga de seguimiento no válida. Abre el formulario desde la liga enviada para tu proyecto.', 'error');
+            hideTrackingPreloader('Liga de seguimiento no válida.', true);
             return;
         }
 
         state.trackingAccessValid = true;
         setGlobalMessage('Validando liga de seguimiento...', 'warning');
+        setTrackingPreloaderSub(`Proyecto: ${state.trackingProjectName}`);
         validateTrackingAccess();
+    }
+
+    function setTrackingPreloaderSub(text) {
+        const sub = document.getElementById('tracking-preloader-sub');
+        if (sub && text) sub.textContent = text;
+    }
+
+    function hideTrackingPreloader(errorMessage, isError) {
+        const node = document.getElementById('tracking-preloader');
+        if (!node) return;
+        if (isError) {
+            node.classList.add('is-error');
+            setTrackingPreloaderSub(errorMessage || 'No se pudo validar la liga.');
+            setTimeout(() => node.classList.add('is-hidden'), 1400);
+            return;
+        }
+        node.classList.add('is-hidden');
     }
 
     async function validateTrackingAccess() {
@@ -334,10 +353,12 @@
             setGlobalMessage('Modo de prueba local habilitado.', 'warning');
             applyProjectContext();
             validateProjectField();
+            hideTrackingPreloader();
             return;
         }
 
         if (!state.hasAppsScript) {
+            hideTrackingPreloader('Sin conexión al servicio de validación.', true);
             return;
         }
 
@@ -354,10 +375,12 @@
             setGlobalMessage('', 'info');
             applyProjectContext();
             validateProjectField();
+            hideTrackingPreloader();
         } catch (error) {
             state.trackingAccessValid = false;
             setFormLocked(true);
             setGlobalMessage(error.message || 'La liga de seguimiento no es valida.', 'error');
+            hideTrackingPreloader(error.message || 'La liga de seguimiento no es válida.', true);
         }
     }
 

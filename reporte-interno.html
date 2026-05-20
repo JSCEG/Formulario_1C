@@ -36,6 +36,7 @@
                 <button type="button" class="internal-button internal-button--ghost" id="reload-button">Actualizar datos</button>
                 <button type="button" class="internal-button internal-button--ghost" id="download-pdf-button">PDF</button>
                 <button type="button" class="internal-button internal-button--primary" id="download-ppt-button">PPT</button>
+                <button type="button" class="internal-button internal-button--ghost" id="download-excel-button">Excel</button>
             </div>
         </section>
 
@@ -134,6 +135,17 @@
             </article>
         </section>
 
+        <section class="panel panel--evolution">
+            <header>
+                <div>
+                    <p>Histórico</p>
+                    <h2>Evolución por proyecto</h2>
+                </div>
+                <span id="evolution-count-label">0 proyectos</span>
+            </header>
+            <div id="evolution-list" class="evolution-list"></div>
+        </section>
+
         <section class="panel panel--table">
             <header>
                 <div>
@@ -158,6 +170,20 @@
                     <tbody id="detail-table-body"></tbody>
                 </table>
             </div>
+            <div class="table-pagination" id="table-pagination" hidden>
+                <button type="button" class="internal-button internal-button--ghost" id="page-prev">‹ Anterior</button>
+                <span id="page-info" class="page-info">Página 1 de 1</span>
+                <button type="button" class="internal-button internal-button--ghost" id="page-next">Siguiente ›</button>
+                <label class="page-size">
+                    <span>Filas</span>
+                    <select id="page-size">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">Todas</option>
+                    </select>
+                </label>
+            </div>
         </section>
 
         <section class="panel panel--preview">
@@ -175,6 +201,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@v3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <script src="reporte-interno.js?v=20260520-interno"></script>
 </body>
 
