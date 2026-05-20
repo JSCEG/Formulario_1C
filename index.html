@@ -41,10 +41,10 @@
     <header class="page-header">
         <div class="shell page-header__inner">
             <div class="brand-lockup" aria-label="Identidad institucional">
-                <img src="Estilos Institucionales/img/logo_gob.png" alt="Gobierno de Mexico"
+                <img src="Estilos Institucionales/img/logo_gob.png" alt="Gobierno de México"
                     class="brand-lockup__logo brand-lockup__logo--gob">
                 <span class="brand-lockup__divider" aria-hidden="true"></span>
-                <img src="Estilos Institucionales/img/logo_sener.png" alt="Secretaria de Energia"
+                <img src="Estilos Institucionales/img/logo_sener.png" alt="Secretaría de Energía"
                     class="brand-lockup__logo brand-lockup__logo--sener">
             </div>
         </div>
@@ -64,6 +64,7 @@
                 </div>
 
                 <div id="global-message" class="notice-banner" hidden></div>
+                <section id="progress-dashboard" class="progress-dashboard" hidden></section>
                 <nav id="form-stepper" class="stepper" aria-label="Pasos del formulario"></nav>
                 <div id="form-sections" class="form-sections"></div>
                 <datalist id="projectNameOptions"></datalist>
@@ -77,13 +78,24 @@
                 </div>
             </form>
 
+            <section id="report-deck-panel" class="report-deck-panel" hidden aria-label="Reporte de seguimiento">
+                <div class="report-toolbar">
+                    <h2>Reporte tipo presentación</h2>
+                    <div class="report-toolbar__actions">
+                        <button type="button" class="btn btn-secondary" id="close-report-button">Volver al formulario</button>
+                        <button type="button" class="btn btn-primary" id="download-pdf-button">Descargar PDF</button>
+                    </div>
+                </div>
+                <div id="report-deck" class="report-deck"></div>
+            </section>
+
         </section>
     </main>
 
     <footer class="page-footer">
         <div class="shell footer-grid">
             <section class="footer-contact animate-soft animate-fade-in-up" aria-label="Contacto">
-                <img src="Estilos Institucionales/img/logo_sener.png" alt="Secretaria de Energia"
+                <img src="Estilos Institucionales/img/logo_sener.png" alt="Secretaría de Energía"
                     class="footer-logo">
                 <ul class="footer-list">
                     <li>
@@ -132,7 +144,10 @@
         </div>
     </footer>
 
-    <script src="formulario-1c.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="formulario-1c.js?v=20260519-edit-button-text"></script>
 </body>
 
 </html>

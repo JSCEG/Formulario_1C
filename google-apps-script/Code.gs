@@ -7,6 +7,7 @@ var PROJECTS_ACTIVE_COLUMN = 3;
 var DUPLICATE_COLUMN = 39;
 var REPORT_DATE_COLUMN = 2;
 var TOTAL_COLUMNS = 58;
+var SCRIPT_VERSION = 'link-validation-2026-05-19-v2';
 
 function doGet(e) {
   if (e && e.parameter && e.parameter.action === 'validate') {
@@ -16,11 +17,12 @@ function doGet(e) {
     return jsonResponse({
       ok: isValidProjectLink,
       validProjectLink: isValidProjectLink,
+      version: SCRIPT_VERSION,
       message: 'Validacion de liga de seguimiento.'
     });
   }
 
-  return jsonResponse({ ok: true, message: 'Formulario 1C Apps Script activo.' });
+  return jsonResponse({ ok: true, version: SCRIPT_VERSION, message: 'Formulario 1C Apps Script activo.' });
 }
 
 function doPost(e) {
@@ -42,11 +44,8 @@ function doPost(e) {
     }
 
     var sheet = getTargetSheet_();
-    if (isDuplicate_(sheet, projectName, reportDate)) {
-      return jsonResponse({ ok: false, duplicate: true, message: 'Ya existe un avance para ese proyecto en la misma semana de reporte.' }, 409);
-    }
-
     rowValues[0] = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
+    rowValues[DUPLICATE_COLUMN - 1] = payload.projectName || rowValues[DUPLICATE_COLUMN - 1];
     if (!rowValues[REPORT_DATE_COLUMN - 1] && reportDate) {
       rowValues[REPORT_DATE_COLUMN - 1] = reportDate;
     }
@@ -124,25 +123,6 @@ function validateProjectAccess_(projectName, trackingKey) {
   return false;
 }
 
-function isDuplicate_(sheet, normalizedProjectName, reportDate) {
-  var lastRow = sheet.getLastRow();
-  if (lastRow < 2) {
-    return false;
-  }
-
-  var reportWeek = getWeekKey_(reportDate);
-  var values = sheet.getRange(2, 1, lastRow - 1, Math.max(DUPLICATE_COLUMN, REPORT_DATE_COLUMN)).getValues();
-  for (var index = 0; index < values.length; index += 1) {
-    var currentValue = normalize_(values[index][DUPLICATE_COLUMN - 1]);
-    var currentWeek = getWeekKey_(values[index][REPORT_DATE_COLUMN - 1]);
-    if (currentValue && currentValue === normalizedProjectName && currentWeek === reportWeek) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function ensureRowLength_(values) {
   var safeValues = values.slice(0, TOTAL_COLUMNS);
   while (safeValues.length < TOTAL_COLUMNS) {
@@ -164,16 +144,6 @@ function normalize_(value) {
 
 function normalizeKey_(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, '');
-}
-
-function getWeekKey_(value) {
-  var date = parseDate_(value) || new Date();
-  var weekDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  var day = weekDate.getUTCDay() || 7;
-  weekDate.setUTCDate(weekDate.getUTCDate() + 4 - day);
-  var yearStart = new Date(Date.UTC(weekDate.getUTCFullYear(), 0, 1));
-  var week = Math.ceil((((weekDate - yearStart) / 86400000) + 1) / 7);
-  return weekDate.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
 }
 
 function parseDate_(value) {
