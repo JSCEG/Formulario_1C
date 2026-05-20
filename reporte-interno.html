@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reporte Interno de Seguimiento de Proyectos</title>
+    <meta name="description" content="Tablero interno para seguimiento agregado de proyectos.">
+    <link rel="stylesheet" href="Estilos Institucionales/css/base-theme.css">
+    <link rel="stylesheet" href="reporte-interno.css">
+</head>
+
+<body>
+    <header class="internal-header">
+        <div class="internal-shell internal-header__inner">
+            <div class="internal-brand" aria-label="Identidad institucional">
+                <img src="Estilos Institucionales/img/logo_gob.png" alt="Gobierno de México">
+                <span aria-hidden="true"></span>
+                <img src="Estilos Institucionales/img/logo_sener.png" alt="Secretaría de Energía">
+            </div>
+            <div class="internal-header__meta">
+                <strong>Reporte interno</strong>
+                <span>DGMESNIE · Seguimiento de proyectos</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="internal-shell internal-main">
+        <section class="internal-title">
+            <div>
+                <p>Subsecretaría de Planeación y Transición Energética</p>
+                <h1>Tablero Interno de Seguimiento de Proyectos</h1>
+                <span>Dirección General de Metodologías y Estadísticas del Sistema Nacional de Información Energética</span>
+            </div>
+            <div class="internal-actions">
+                <button type="button" class="internal-button internal-button--ghost" id="reload-button">Actualizar datos</button>
+                <button type="button" class="internal-button internal-button--ghost" id="download-pdf-button">PDF</button>
+                <button type="button" class="internal-button internal-button--primary" id="download-ppt-button">PPT</button>
+            </div>
+        </section>
+
+        <section class="filter-panel" aria-label="Filtros del reporte">
+            <label>
+                <span>Proyecto</span>
+                <select id="project-filter"></select>
+            </label>
+            <label>
+                <span>Etapa</span>
+                <select id="stage-filter"></select>
+            </label>
+            <label>
+                <span>Trámite</span>
+                <select id="procedure-filter"></select>
+            </label>
+            <label>
+                <span>Grupo de estatus</span>
+                <select id="mode-filter">
+                    <option value="">Todos</option>
+                    <option value="complete">Concluidos</option>
+                    <option value="progress">En proceso</option>
+                    <option value="issue">Incidencias</option>
+                    <option value="pending">Sin dato</option>
+                </select>
+            </label>
+            <label>
+                <span>Estatus específico</span>
+                <select id="status-filter"></select>
+            </label>
+            <label>
+                <span>Tipo MIA/ETJ</span>
+                <select id="type-filter"></select>
+            </label>
+            <label class="filter-panel__search">
+                <span>Búsqueda</span>
+                <input id="search-filter" type="search" placeholder="Proyecto, trámite o comentario">
+            </label>
+        </section>
+
+        <div id="status-message" class="status-message">Cargando información de Google Sheets...</div>
+
+        <section class="kpi-strip" aria-label="Indicadores principales">
+            <article>
+                <span>Proyectos</span>
+                <strong id="kpi-projects">0</strong>
+                <small>con historial</small>
+            </article>
+            <article>
+                <span>Avance promedio</span>
+                <strong id="kpi-average">0%</strong>
+                <small>sobre trámites aplicables</small>
+            </article>
+            <article>
+                <span>Concluidos</span>
+                <strong id="kpi-complete">0</strong>
+                <small>trámites filtrados</small>
+            </article>
+            <article>
+                <span>Atención</span>
+                <strong id="kpi-attention">0</strong>
+                <small>en proceso o incidencia</small>
+            </article>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="panel panel--project">
+                <header>
+                    <div>
+                        <p>Avance por proyecto</p>
+                        <h2>Portafolio</h2>
+                    </div>
+                    <span id="project-count-label">0 proyectos</span>
+                </header>
+                <div id="project-progress-list" class="project-progress-list"></div>
+            </article>
+
+            <article class="panel">
+                <header>
+                    <div>
+                        <p>Distribución</p>
+                        <h2>Estatus agregado</h2>
+                    </div>
+                </header>
+                <div id="status-bars" class="status-bars"></div>
+            </article>
+
+            <article class="panel">
+                <header>
+                    <div>
+                        <p>Etapas</p>
+                        <h2>Promedio de avance</h2>
+                    </div>
+                </header>
+                <div id="stage-bars" class="stage-bars"></div>
+            </article>
+        </section>
+
+        <section class="panel panel--table">
+            <header>
+                <div>
+                    <p>Detalle operativo</p>
+                    <h2>Trámites por proyecto</h2>
+                </div>
+                <span id="detail-count-label">0 registros</span>
+            </header>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Proyecto</th>
+                            <th>Etapa</th>
+                            <th>Trámite</th>
+                            <th>Estatus</th>
+                            <th>Tipo</th>
+                            <th>Última actualización</th>
+                            <th>Comentario</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detail-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel panel--preview">
+            <header>
+                <div>
+                    <p>Previsualización</p>
+                    <h2>Reporte ejecutivo exportable</h2>
+                </div>
+                <span>PDF / PPT</span>
+            </header>
+            <div id="internal-report-deck" class="internal-report-deck" aria-label="Láminas para exportación"></div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@v3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="reporte-interno.js?v=20260520-interno"></script>
+</body>
+
+</html>
