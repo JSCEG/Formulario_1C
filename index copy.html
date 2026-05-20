@@ -1,0 +1,1382 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PVIRCE 2026-2040 · DGMESNIE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/full-screen.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@v3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+@font-face {
+  font-family: 'Patria';
+  src: url('Estilos Institucionales/tipografias/Patria_Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Patria';
+  src: url('Estilos Institucionales/tipografias/Patria_Bold.otf') format('opentype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'Patria';
+  src: url('Estilos Institucionales/tipografias/Patria_Light.otf') format('opentype');
+  font-weight: 300;
+}
+
+:root {
+  --guinda: #9B2247;
+  --verde: #1E5B4F;
+  --dorado: #A57F2C;
+  --gris: #98989A;
+  --gris-claro: #E5E5E5;
+  --text: #2b2b2b;
+  --bg: #f3f4f6;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+  --font-h: 'Patria', 'Merriweather', serif;
+  --font-b: 'Noto Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-b);
+  background: var(--bg);
+  color: var(--text);
+  padding: 40px 20px;
+}
+
+.toolbar {
+  max-width: var(--slide-w);
+  margin: 0 auto 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar h1 {
+  font-family: var(--font-h);
+  font-size: 22px;
+  color: var(--guinda);
+  margin-right: auto;
+}
+
+.toolbar select, .toolbar button {
+  font-family: var(--font-b);
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--gris);
+  background: white;
+  cursor: pointer;
+}
+
+.toolbar button.primary {
+  background: var(--guinda);
+  color: white;
+  border-color: var(--guinda);
+  font-weight: 700;
+}
+
+.toolbar button.secondary {
+  background: var(--verde);
+  color: white;
+  border-color: var(--verde);
+  font-weight: 700;
+}
+
+.deck {
+  max-width: var(--slide-w);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.slide {
+  width: var(--slide-w);
+  height: var(--slide-h);
+  background: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============ PORTADA ============ */
+.slide.cover {
+  background: #6a172f;
+  color: white;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.slide.cover .cover-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+}
+.slide.cover .cover-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(155,34,71,.35) 0%, rgba(30,91,79,.25) 60%, rgba(0,0,0,.45) 100%);
+  z-index: 1;
+}
+.slide.cover .top-band, .slide.cover .body, .slide.cover .bottom-band { position: relative; z-index: 2; }
+
+.cover .top-band {
+  background: rgba(255,255,255,.96);
+  padding: 18px 56px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 4px solid var(--dorado);
+}
+
+.cover .top-band img { height: 56px; width: auto; }
+.cover .top-band .divider {
+  width: 1px; height: 48px; background: var(--gris);
+}
+.cover .top-band .unit {
+  font-size: 11px;
+  color: var(--text);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.cover .body {
+  padding: 20px 60px 64px 28%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 20px;
+  text-align: left;
+}
+
+.cover .eyebrow {
+  font-family: var(--font-b);
+  font-size: 14px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--dorado);
+  font-weight: 700;
+}
+
+.cover h1 {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1.05;
+  max-width: 900px;
+  text-shadow: 0 2px 12px rgba(0,0,0,.3);
+}
+
+.cover .unidad {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.3;
+  color: white;
+  max-width: 720px;
+  border-left: 3px solid var(--dorado);
+  padding-left: 14px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+
+.cover .subtitle {
+  font-family: var(--font-h);
+  font-weight: 300;
+  font-size: 26px;
+  color: rgba(255,255,255,.92);
+  max-width: 800px;
+}
+
+.cover .meta {
+  margin-top: 24px;
+  display: flex;
+  gap: 32px;
+  font-size: 14px;
+  color: rgba(255,255,255,.85);
+}
+.cover .meta strong { color: var(--dorado); display: block; font-size: 12px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 4px; }
+
+.cover .bottom-band {
+  height: 14px;
+  background: linear-gradient(90deg, var(--guinda) 0%, var(--guinda) 33%, var(--verde) 33%, var(--verde) 66%, var(--dorado) 66%);
+}
+
+/* ============ CONTENIDO ============ */
+.slide.content {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  padding: 0;
+}
+
+.content .header {
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  padding: 14px 28px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  border-bottom: 2px solid var(--guinda);
+}
+.content .header .brand-left {
+  font-family: var(--font-h);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--guinda);
+  letter-spacing: .02em;
+  display: flex; align-items: center; gap: 10px;
+}
+.content .header .brand-left::before {
+  content: ''; width: 4px; height: 24px; background: var(--guinda); border-radius: 2px;
+}
+.content .header .ef-title {
+  font-family: var(--font-h);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+.content .header .ef-title::before, .content .header .ef-title::after {
+  content: '·'; color: var(--dorado); margin: 0 14px; font-size: 24px;
+}
+.content .header .logo-right { display: flex; justify-content: flex-end; align-items: center; }
+.content .header .logo-right img { height: 38px; }
+
+.content .narrative {
+  padding: 14px 28px 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.content .narrative strong { color: var(--guinda); font-weight: 700; }
+
+.kpi-row {
+  padding: 6px 28px 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.kpi {
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid var(--gris-claro);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--guinda);
+}
+.kpi:nth-child(2)::before { background: var(--verde); }
+.kpi:nth-child(3)::before { background: var(--dorado); }
+.kpi:nth-child(4)::before { background: var(--gris); }
+.kpi .value {
+  font-family: var(--font-h);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--guinda);
+  line-height: 1;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+.kpi:nth-child(2) .value { color: var(--verde); }
+.kpi:nth-child(3) .value { color: var(--dorado); }
+.kpi:nth-child(4) .value { color: var(--text); }
+.kpi .label {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text); font-weight: 700;
+  line-height: 1.25;
+  flex: 1;
+}
+.kpi .label small { display: block; font-weight: 400; color: var(--gris); letter-spacing: .08em; margin-top: 2px; font-size: 9px; text-transform: none; }
+
+.content .body {
+  padding: 4px 28px 12px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0;
+  background: white;
+  border: 1px solid var(--gris-claro);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.panel h3 {
+  background: linear-gradient(180deg, #fbfbfb 0%, #f3f3f3 100%);
+  color: var(--guinda);
+  font-family: var(--font-b);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--guinda);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel h3::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--guinda); display: inline-block;
+}
+.panel.accent-verde h3 { color: var(--verde); border-bottom-color: var(--verde); }
+.panel.accent-verde h3::before { background: var(--verde); }
+.panel.accent-dorado h3 { color: var(--dorado); border-bottom-color: var(--dorado); }
+.panel.accent-dorado h3::before { background: var(--dorado); }
+.panel .chart { flex: 1; min-height: 0; padding: 8px 6px 4px; }
+.panel > div:not(.chart) { flex: 1; min-height: 0; }
+
+.col-stack { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.col-stack .panel { flex: 1; min-height: 0; }
+
+table.proyectos, table.tech {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+table.proyectos thead th, table.tech thead th {
+  background: #f7f7f8;
+  color: var(--text);
+  text-align: left;
+  padding: 6px 8px;
+  font-weight: 700;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--gris);
+}
+table.proyectos td, table.tech td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+table.tech td { padding: 3px 8px; font-size: 9.5px; }
+table.tech thead th { padding: 4px 8px; font-size: 9.5px; }
+table.proyectos tbody tr:hover, table.tech tbody tr:hover { background: rgba(155,34,71,.04); }
+table.proyectos tbody tr:hover, table.tech tbody tr:hover { background: rgba(155,34,71,.04); }
+table.proyectos td.mw, table.tech td.mw,
+table.proyectos th.mw, table.tech th.mw {
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+table.proyectos td.mw, table.tech td.mw { font-weight: 700; color: var(--guinda); }
+table.tech tbody td:first-child { font-weight: 600; color: var(--verde); }
+table.tech tfoot td { border-top: 2px solid var(--guinda); border-bottom: 0; background: #faf3f5; font-weight: 700; }
+
+.content .footer {
+  background: var(--guinda);
+  height: 8px;
+  background: linear-gradient(90deg, var(--guinda) 0%, var(--guinda) 60%, var(--dorado) 60%, var(--dorado) 100%);
+}
+
+/* ============ SLIDE MAPA ============ */
+.slide.map-slide { display: grid; grid-template-rows: auto auto 1fr auto; padding: 0; }
+.map-slide .map-toolbar {
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+  border-bottom: 1px solid var(--gris-claro);
+}
+.map-slide .map-toolbar label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text); }
+.map-slide .map-toolbar select { padding: 6px 12px; border: 1px solid var(--gris); border-radius: 4px; font-family: var(--font-b); font-size: 13px; background: white; }
+.map-slide .map-toolbar .legend { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--text); }
+.map-slide .map-toolbar .legend .ramp { display: inline-block; width: 160px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, #f7e3ea 0%, #d99cb1 25%, #c46d8a 50%, #a83a5d 75%, #6a172f 100%); border: 1px solid #ccc; }
+.map-slide .map-body { display: grid; grid-template-columns: 1fr 320px; gap: 0; min-height: 0; }
+.map-slide.focused .map-body { grid-template-columns: 1fr 380px; }
+.map-slide .ef-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.map-slide .ef-mini-card { background: white; border: 1px solid var(--gris-claro); border-radius: 4px; padding: 5px 7px; }
+.map-slide .ef-mini-card .lbl { font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--gris); font-weight: 700; line-height: 1.1; }
+.map-slide .ef-mini-card .val { font-family: var(--font-h); font-size: 14px; font-weight: 700; color: var(--guinda); margin-top: 1px; line-height: 1; }
+.map-slide .ef-mini-card .sub { font-size: 8.5px; color: var(--text); margin-top: 1px; line-height: 1.1; }
+.map-slide .ef-section-title { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--guinda); font-weight: 700; margin-top: 2px; padding-bottom: 2px; border-bottom: 1px solid var(--guinda); }
+.map-slide .ef-bar-row { display: flex; align-items: center; gap: 5px; font-size: 9.5px; padding: 1.5px 0; }
+.map-slide .ef-bar-row .name { width: 34px; font-weight: 700; color: var(--text); }
+.map-slide .ef-bar-row .bar { flex: 1; height: 7px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+.map-slide .ef-bar-row .bar > span { display: block; height: 100%; background: var(--guinda); }
+.map-slide .ef-bar-row .num { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--guinda); width: 58px; text-align: right; font-size: 9px; }
+.map-slide #mapa { height: 100%; min-height: 0; background: #f4f6f8; }
+.map-slide .side-panel {
+  background: #fafafa; border-left: 1px solid var(--gris-claro);
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;
+  overflow: auto;
+}
+.map-slide .side-panel h4 { font-family: var(--font-h); color: var(--guinda); font-size: 14px; font-weight: 700; }
+.map-slide .side-panel .stat { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; border-bottom: 1px dashed var(--gris-claro); font-size: 11px; }
+.map-slide .side-panel .stat strong { font-family: var(--font-h); color: var(--guinda); font-size: 13px; font-variant-numeric: tabular-nums; }
+.map-slide .side-panel .hint { font-size: 10px; color: var(--gris); font-style: italic; }
+.leaflet-tooltip.ef-tip { background: rgba(155,34,71,.95); color: white; border: none; box-shadow: 0 2px 6px rgba(0,0,0,.2); font-family: 'Noto Sans', sans-serif; font-size: 11px; padding: 6px 10px; border-radius: 4px; }
+.leaflet-tooltip.ef-tip strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.leaflet-tooltip.ef-tip::before { display: none; }
+
+/* ============ PRELOADER ============ */
+.preloader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #9B2247 0%, #6a172f 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; color: white;
+  transition: opacity .35s ease;
+}
+.preloader.hidden { opacity: 0; pointer-events: none; }
+.preloader .spin {
+  width: 44px; height: 44px;
+  border: 3px solid rgba(255,255,255,.2);
+  border-top-color: var(--dorado);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.preloader h2 { font-family: var(--font-h); font-size: 20px; font-weight: 700; }
+.preloader .msg { font-size: 12px; color: rgba(255,255,255,.85); letter-spacing: .04em; }
+
+@media print {
+  @page { size: 13.333in 7.5in; margin: 0; }
+  html, body { padding: 0; margin: 0; background: white; width: 13.333in; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .toolbar, .highcharts-contextbutton, .highcharts-exporting-group, .preloader { display: none !important; }
+  .deck { gap: 0; max-width: none; margin: 0; }
+  .slide {
+    width: 13.333in;
+    height: 7.5in;
+    box-shadow: none;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="preloader" class="preloader">
+  <div class="spin"></div>
+  <h2>PVIRCE 2026-2040</h2>
+  <div class="msg" id="preloaderMsg">Cargando datos…</div>
+</div>
+
+<div class="toolbar">
+  <h1 style="line-height:1.2"><span style="font-size:13px;font-weight:400;color:#666;display:block;font-family:'Noto Sans',sans-serif;letter-spacing:.04em">PVIRCE · Subsecretaría de Planeación y Transición Energética</span>Dirección General de Metodologías y Estadísticas del Sistema Nacional de Información Energética</h1>
+  <a href="GAT-MIXTO-DGMESNIE.html" style="font-size:12px;text-decoration:none;color:var(--guinda);font-weight:700;border:1px solid var(--guinda);padding:6px 10px;border-radius:4px">GAT-Mixto →</a>
+  <label style="font-size:13px;">EF:
+    <select id="efSelect"><option>Cargando…</option></select>
+  </label>
+  <label style="font-size:13px;">Estatus:
+    <select id="statusSelect"><option value="__ALL__">Todos</option></select>
+  </label>
+  <label style="font-size:13px;">Proyecto:
+    <select id="projectSelect"><option value="__ALL__">Todos</option></select>
+  </label>
+  <button class="secondary" onclick="window.open(SHEET_EDIT_URL,'_blank')">Modificar datos</button>
+  <button class="secondary" onclick="loadData()">Recargar</button>
+  <button class="secondary" onclick="printReport()">Vista PDF</button>
+  <button class="primary" id="btnPpt">Descargar PPT</button>
+</div>
+
+<div class="deck">
+
+  <!-- ============ SLIDE 1: PORTADA ============ -->
+  <section class="slide cover">
+    <img class="cover-bg" src="https://cdn.sassoapps.com/dgmesnie/portada_ppt.png" alt="">
+    <div class="cover-overlay"></div>
+    <div class="top-band">
+      <img src="https://cdn.sassoapps.com/dgmesnie/logo_gob.png" alt="Gobierno de México">
+      <div class="divider"></div>
+      <img src="https://cdn.sassoapps.com/dgmesnie/logo_sener.png" alt="SENER">
+      <div style="margin-left:auto" class="unit">DGMESNIE · Subsecretaría de Planeación</div>
+    </div>
+
+    <div class="body">
+      <div class="eyebrow">Programa Vinculante 2026 — 2040</div>
+      <h1>Instalación y Retiro de Centrales Eléctricas</h1>
+      <div class="unidad">Dirección General de Metodologías y Estadísticas del Sistema Nacional de Información Energética</div>
+      <div class="subtitle" id="coverEf"><span id="coverScopeLabel">Entidad Federativa</span>: <strong>Yucatán</strong></div>
+      <div class="meta">
+        <div><strong>Versión</strong>2026 · v1.0</div>
+        <div><strong>Fecha</strong>Mayo 2026</div>
+        <div><strong>Fuente</strong>SNIE — DGMESNIE</div>
+      </div>
+    </div>
+
+    <div class="bottom-band"></div>
+  </section>
+
+  <!-- ============ SLIDE 2: CONTENIDO ============ -->
+  <section class="slide content">
+    <div class="header">
+      <div class="brand-left">PVIRCE 2026-2040</div>
+      <div class="ef-title" id="contEf">Yucatán</div>
+      <div class="logo-right"><img src="https://cdn.sassoapps.com/dgmesnie/logo_sener.png" alt="SENER"></div>
+    </div>
+
+    <div class="narrative" id="narrative">Cargando datos…</div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="value" id="kpiMW">—</div><div class="label">MW capacidad<br>instalada</div></div>
+      <div class="kpi"><div class="value" id="kpiProj">—</div><div class="label">Total de<br>proyectos</div></div>
+      <div class="kpi"><div class="value" id="kpiPct">—</div><div class="label">Participación<br>nacional</div></div>
+      <div class="kpi"><div class="value" id="kpiHorizon">—</div><div class="label">Horizonte</div></div>
+    </div>
+
+    <div class="body">
+      <div class="col-stack">
+        <div class="panel">
+          <h3>Trayectoria anual por tecnología</h3>
+          <div class="chart" id="chartTrayectoria"></div>
+        </div>
+        <div class="panel accent-dorado">
+          <h3>Capacidad instalada por tecnología</h3>
+          <div id="techTable"></div>
+        </div>
+      </div>
+
+      <div class="panel accent-verde">
+        <h3 id="topPanelTitle">Top 10 proyectos por capacidad instalada</h3>
+        <div id="topTable" style="overflow:auto"></div>
+      </div>
+
+      <div class="col-stack">
+        <div class="panel accent-verde">
+          <h3>Generación por participación</h3>
+          <div class="chart" id="chartDonut"></div>
+        </div>
+        <div class="panel accent-dorado">
+          <h3>Capacidad instalada acumulada</h3>
+          <div class="chart" id="chartBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer"></div>
+  </section>
+
+  <!-- ============ SLIDE 3: MAPA NACIONAL ============ -->
+  <section class="slide content map-slide">
+    <div class="header">
+      <div class="brand-left">PVIRCE 2026-2040</div>
+      <div class="ef-title" id="mapSlideTitle">Mapa nacional</div>
+      <div class="logo-right"><img src="https://cdn.sassoapps.com/dgmesnie/logo_sener.png" alt="SENER"></div>
+    </div>
+
+    <div class="map-toolbar" id="mapToolbar">
+      <div id="mapToolbarNacional" style="display:flex;align-items:center;gap:14px;flex:1">
+        <label for="mapMetric">Métrica:</label>
+        <select id="mapMetric">
+          <option value="capacidad">Capacidad instalada MW</option>
+          <option value="proyectos">Número de proyectos</option>
+          <option value="firmesMW">MW firmes</option>
+          <option value="renovableMW">MW renovable</option>
+        </select>
+        <label for="mapTipo" style="margin-left:14px">Tecnología:</label>
+        <select id="mapTipo"><option value="__ALL__">Todas</option></select>
+        <div class="legend">
+          <span>Bajo</span>
+          <span class="ramp"></span>
+          <span>Alto</span>
+        </div>
+      </div>
+      <div id="mapToolbarEf" style="display:none;flex:1;align-items:center;gap:10px;font-size:12px;color:var(--text)">
+        <span style="font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--guinda)">Detalle EF</span>
+        <span id="mapEfBadge" style="background:var(--guinda);color:white;padding:3px 10px;border-radius:12px;font-weight:700"></span>
+        <button id="mapClearEf" style="margin-left:auto;padding:4px 10px;background:transparent;border:1px solid var(--gris);border-radius:4px;font-size:11px;cursor:pointer">← Volver a Nacional</button>
+      </div>
+    </div>
+
+    <div class="map-body">
+      <div id="mapa"></div>
+      <div class="side-panel">
+        <h4 id="mapEfTitle">Selecciona un estado</h4>
+        <div class="hint" id="mapHint">Click en cualquier entidad federativa para ver su detalle. Doble click para fijarla en las otras láminas.</div>
+        <div id="mapStats"></div>
+      </div>
+    </div>
+
+    <div class="footer"></div>
+  </section>
+
+</div>
+
+<script>
+Highcharts.setOptions({
+  colors: ['#9B2247', '#1E5B4F', '#A57F2C', '#98989A', '#5d2a3f', '#3a7a6c', '#c79b3f', '#6b6b6d'],
+  chart: {
+    style: { fontFamily: "'Noto Sans', sans-serif" },
+    events: {
+      fullscreenOpen: function() { this.update({ chart: { backgroundColor: '#ffffff' } }, false); this.redraw(); },
+      fullscreenClose: function() { this.update({ chart: { backgroundColor: 'transparent' } }, false); this.redraw(); }
+    }
+  },
+  credits: { enabled: false },
+  title: { text: null },
+  lang: { thousandsSep: ',', viewFullscreen: 'Pantalla completa' },
+  exporting: {
+    enabled: true,
+    buttons: {
+      contextButton: {
+        menuItems: null,
+        titleKey: 'viewFullscreen',
+        symbol: 'url(data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%239B2247%22 stroke-width=%222.5%22><path d=%22M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5%22/></svg>)',
+        symbolSize: 12,
+        symbolX: 8, symbolY: 8,
+        align: 'right', verticalAlign: 'top',
+        x: -10, y: 4,
+        width: 16, height: 16,
+        onclick: function() { this.fullscreen.toggle(); },
+        theme: {
+          fill: 'rgba(255,255,255,0.85)',
+          stroke: '#E5E5E5',
+          'stroke-width': 1,
+          r: 3,
+          padding: 2,
+          states: { hover: { fill: 'rgba(155,34,71,.12)', stroke: '#9B2247' } }
+        }
+      }
+    }
+  }
+});
+
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_uIRNruk-Dqg4aV21IPIS04XnhVmJPDJZB8qO94y8UXC6kZvetmMq77SOILJ-joGP-CmEf3KlryqI/pub?gid=388978604&single=true&output=csv';
+const SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_uIRNruk-Dqg4aV21IPIS04XnhVmJPDJZB8qO94y8UXC6kZvetmMq77SOILJ-joGP-CmEf3KlryqI/pubhtml?gid=388978604&single=true';
+
+let DATA = [];
+
+function num(x) { const n = parseFloat(String(x).replace(/,/g,'')); return isNaN(n) ? 0 : n; }
+function fmt(n, d=1) { return n.toLocaleString('es-MX', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+function cleanHeader(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
+function field(row, names) {
+  const keys = Object.keys(row || {});
+  for (const name of names) {
+    if (row[name] != null && String(row[name]).trim() !== '') return row[name];
+    const target = cleanHeader(name).toLowerCase();
+    const key = keys.find(k => cleanHeader(k).toLowerCase() === target);
+    if (key && String(row[key]).trim() !== '') return row[key];
+  }
+  return '';
+}
+function isMarked(value) {
+  const v = String(value || '').trim().toLowerCase();
+  return ['1', 'x', '*', 'si', 'sí', 'true', 'verdadero', 'no considerar'].includes(v);
+}
+function findHeaderOffset(text) {
+  const preview = Papa.parse(text, { skipEmptyLines: true }).data || [];
+  const idx = preview.findIndex(row => {
+    const headers = row.map(cleanHeader);
+    return headers.includes('Nombre real') && headers.includes('Entidad Federativa');
+  });
+  return idx >= 0 ? idx : 1;
+}
+function filteredData() {
+  const statusVal = document.getElementById('statusSelect')?.value || '__ALL__';
+  return statusVal === '__ALL__' ? DATA : DATA.filter(r => r.status === statusVal);
+}
+function filteredDataByEfAndStatus() {
+  const efVal = document.getElementById('efSelect')?.value || '__ALL__';
+  const rows = filteredData();
+  return efVal === '__ALL__' ? rows : rows.filter(r => r.ef === efVal);
+}
+function selectedProjectRows() {
+  const projectVal = document.getElementById('projectSelect')?.value || '__ALL__';
+  return projectVal === '__ALL__' ? null : DATA.filter(r => String(r.id) === projectVal);
+}
+function activeDataForMap() {
+  return selectedProjectRows() || filteredData();
+}
+function fileSafe(value) {
+  return String(value || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90) || 'Sin-nombre';
+}
+function getReportBaseName() {
+  const projectRows = selectedProjectRows();
+  if (projectRows?.length) {
+    return `PVIRCE-2026-2040_DGMESNIE_Proyecto_${fileSafe(projectRows[0].nombre)}`;
+  }
+
+  const ef = document.getElementById('efSelect')?.value || '__ALL__';
+  const status = document.getElementById('statusSelect')?.value || '__ALL__';
+  const parts = ['PVIRCE-2026-2040', 'DGMESNIE'];
+  parts.push(ef === '__ALL__' ? 'Nacional' : `EF_${fileSafe(ef)}`);
+  if (status !== '__ALL__') parts.push(`Estatus_${fileSafe(status)}`);
+  return parts.join('_');
+}
+function updateDocumentTitle() {
+  document.title = getReportBaseName();
+}
+function printReport() {
+  updateDocumentTitle();
+  window.print();
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('preloaderMsg');
+  if (el) el.textContent = msg;
+  console.log('[STATUS]', msg);
+}
+function hidePreloader() {
+  const p = document.getElementById('preloader');
+  if (p) { p.classList.add('hidden'); setTimeout(() => p.style.display = 'none', 400); }
+}
+
+async function tryFetch(url, ms=20000) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(url, { redirect: 'follow', signal: ctl.signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.text();
+  } finally { clearTimeout(t); }
+}
+
+async function loadData() {
+  let text;
+  const cb = '?_=' + Date.now();
+  const proxies = [
+    '/data' + cb,
+    CSV_URL,
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(CSV_URL),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL)
+  ];
+  let lastErr;
+  for (let i=0; i<proxies.length; i++) {
+    const url = proxies[i];
+    setStatus(`Cargando fuente ${i+1}/${proxies.length}…`);
+    try {
+      text = await tryFetch(url);
+      setStatus(`Datos recibidos (${text.length} bytes). Procesando…`);
+      break;
+    } catch (e) { lastErr = e; console.warn('Fail', i, e.message); }
+  }
+  if (!text) throw lastErr || new Error('No data — todas las fuentes fallaron');
+  const lines = text.split(/\r?\n/);
+  const csv = lines.slice(findHeaderOffset(text)).join('\n');
+  const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
+  DATA = parsed.data.map((r, idx) => ({
+    id: idx,
+    status: field(r, ['Status CMMV2', 'Status_CMMV2', 'Status VF', 'Status_VF', 'Status CMMV', 'Status_CMMV', 'Status']) || 'Sin estatus',
+    statusVf: field(r, ['Status VF', 'Status_VF']),
+    nombre: field(r, ['Nombre real']),
+    anio: parseInt(field(r, ['Año', 'Anio'])) || null,
+    adicion: field(r, ['Adiciones o sustituciones', 'Adiciones o sustituciones']),
+    contratoUnidad: field(r, ['Contrato o unidad', 'Contrato     o unidad', 'Contrato unidad']),
+    tipo: field(r, ['Tipo VF', 'Tipo_VF', 'Tipo']),
+    tipoBase: field(r, ['Tipo']),
+    renovable: field(r, ['Renovable']),
+    mw: num(field(r, ['MW'])),
+    mes: field(r, ['Mes']),
+    gerencia: field(r, ['Gerencia de control']),
+    region: field(r, ['Región de transmisión', 'Region de transmision']),
+    municipio: field(r, ['Municipio']),
+    ef: String(field(r, ['Entidad Federativa'])).trim(),
+    firme: String(field(r, ['Firmes'])).trim() === '*',
+    noConsiderar: isMarked(field(r, ['No considerar', 'No considerar C', 'No considerar CMMV', 'No considerar CMMV2']))
+  })).filter(r => r.ef && r.anio && !r.noConsiderar);
+
+  populateEFSelect();
+  populateStatusSelect();
+  populateProjectSelect();
+  render();
+  initMap().catch(e => console.warn('Mapa no cargo:', e));
+  hidePreloader();
+}
+
+function populateEFSelect() {
+  const efs = [...new Set(DATA.map(r => r.ef))].sort();
+  const sel = document.getElementById('efSelect');
+  sel.innerHTML = `<option value="__ALL__">Todos (Nacional)</option>` + efs.map(e => `<option>${e}</option>`).join('');
+  sel.value = '__ALL__';
+}
+
+function populateStatusSelect() {
+  const statuses = [...new Set(DATA.map(r => r.status).filter(Boolean))].sort();
+  const sel = document.getElementById('statusSelect');
+  sel.innerHTML = `<option value="__ALL__">Todos</option>` + statuses.map(s => `<option>${s}</option>`).join('');
+  sel.value = '__ALL__';
+}
+
+function populateProjectSelect() {
+  const current = document.getElementById('projectSelect')?.value || '__ALL__';
+  const candidates = filteredDataByEfAndStatus();
+  const nameCounts = candidates.reduce((acc, r) => {
+    if (r.nombre) acc[r.nombre] = (acc[r.nombre] || 0) + 1;
+    return acc;
+  }, {});
+  const projects = candidates
+    .filter(r => r.nombre)
+    .sort((a,b) => a.nombre.localeCompare(b.nombre, 'es-MX'));
+  const sel = document.getElementById('projectSelect');
+  sel.innerHTML = `<option value="__ALL__">Todos</option>` + projects.map(p => {
+    const label = nameCounts[p.nombre] > 1
+      ? `${p.nombre} · ${p.ef || '—'} · ${p.tipo || '—'} · ${p.anio || '—'} · ${fmt(p.mw,1)} MW`
+      : p.nombre;
+    return `<option value="${p.id}">${label}</option>`;
+  }).join('');
+  sel.value = [...sel.options].some(o => o.value === current) ? current : '__ALL__';
+}
+
+function render() {
+  const efVal = document.getElementById('efSelect').value;
+  const projectRows = selectedProjectRows();
+  const isProject = !!projectRows;
+  const isAll = !isProject && efVal === '__ALL__';
+  const ef = isProject ? projectRows[0]?.nombre || 'Proyecto' : isAll ? 'Nacional' : efVal;
+  updateDocumentTitle();
+  document.getElementById('coverScopeLabel').textContent = isProject ? 'Proyecto' : 'Entidad Federativa';
+  document.querySelector('#coverEf strong').textContent = ef;
+  document.getElementById('contEf').textContent = ef;
+  CURRENT_FOCUS_EF = isProject ? (projectRows[0]?.ef || null) : isAll ? null : ef;
+  if (geoData && mapInstance) {
+    populateMapTipoSelect();
+    drawMap();
+  }
+
+  const all = isProject ? DATA : filteredData();
+  const rows = isProject ? projectRows : filteredDataByEfAndStatus();
+
+  const totalMW = rows.reduce((s,r) => s + r.mw, 0);
+  const totalProj = rows.length;
+  const nacionalMW = all.reduce((s,r) => s + r.mw, 0);
+  const pct = nacionalMW ? (totalMW / nacionalMW * 100) : 0;
+  const years = rows.map(r => r.anio).filter(Boolean);
+  const yMin = Math.min(...years), yMax = Math.max(...years);
+
+  document.getElementById('kpiMW').textContent = fmt(totalMW, 1);
+  document.getElementById('kpiProj').textContent = isProject ? 1 : totalProj;
+  document.getElementById('kpiPct').textContent = fmt(pct, 2) + '%';
+  document.getElementById('kpiHorizon').textContent = isFinite(yMin) ? `${yMin}-${yMax}` : '—';
+
+  // Narrative
+  const tipos = {};
+  rows.forEach(r => { tipos[r.tipo] = (tipos[r.tipo]||0) + r.mw; });
+  const topTipo = Object.entries(tipos).sort((a,b) => b[1]-a[1])[0];
+  const stats = {};
+  rows.forEach(r => { stats[r.status] = (stats[r.status]||0) + r.mw; });
+  const topStatus = Object.entries(stats).sort((a,b) => b[1]-a[1])[0];
+  const firmes = rows.filter(r => r.firme);
+  const firmesMW = firmes.reduce((s,r) => s + r.mw, 0);
+  document.getElementById('narrative').innerHTML = isProject && rows.length ?
+    `El proyecto <strong>${ef}</strong> se ubica en <strong>${rows[0].municipio || '—'}, ${rows[0].ef || '—'}</strong>, con <strong>${fmt(totalMW,1)} MW</strong> registrados para <strong>${yMin || '—'}</strong>. Su estatus PVIRCE es <strong>${rows[0].status || '—'}</strong>; tecnología: <strong>${[...new Set(rows.map(r => r.tipo).filter(Boolean))].join(', ') || '—'}</strong>; condición firme: <strong>${firmes.length ? 'Sí' : 'No'}</strong>.` :
+    topTipo && topStatus ?
+    `En <strong>${ef}</strong>, la capacidad instalada suma <strong>${fmt(totalMW,1)} MW distribuidos en ${totalProj} proyectos</strong>, de los cuales <strong>${firmes.length} son firmes (${fmt(firmesMW,0)} MW)</strong>. La tecnología de mayor peso es <strong>${topTipo[0]}, con ${fmt(topTipo[1],0)} MW</strong>. El estatus dominante por capacidad instalada es <strong>${topStatus[0]}, con ${fmt(topStatus[1],0)} MW</strong>.` :
+    `Sin datos para ${ef}.`;
+
+  // Trayectoria anual stacked col
+  const allYears = [...new Set(rows.map(r => r.anio))].sort();
+  const allTipos = [...new Set(rows.map(r => r.tipo))].sort();
+  const series = allTipos.map(t => ({
+    name: t,
+    data: allYears.map(y => +rows.filter(r => r.anio===y && r.tipo===t).reduce((s,r)=>s+r.mw,0).toFixed(1))
+  }));
+
+  Highcharts.chart('chartTrayectoria', {
+    chart: { type: 'column', backgroundColor: 'transparent' },
+    xAxis: { categories: allYears, lineColor: '#E5E5E5', labels: { style: { fontSize: '10px' } } },
+    yAxis: { title: { text: 'MW', style: { fontSize: '10px' } }, gridLineColor: '#f0f0f0', labels: { style: { fontSize: '9px' } } },
+    legend: { itemStyle: { fontSize: '9px' }, margin: 5, padding: 2 },
+    plotOptions: { column: { stacking: 'normal', borderWidth: 0, dataLabels: { enabled: true, style: { fontSize: '8px', fontWeight: 'bold' }, formatter: function() { return this.y > 30 ? this.y + ' MW' : ''; } } } },
+    series: series,
+    tooltip: { pointFormat: '<b>{series.name}</b>: {point.y:.1f} MW<br>' }
+  });
+
+  // Tech table con % participación estatal
+  const techRows = Object.entries(tipos).sort((a,b) => b[1]-a[1])
+    .map(([t,m]) => {
+      const pctEf = totalMW ? (m/totalMW*100) : 0;
+      return `<tr><td>${t}</td><td class="mw">${fmt(m,1)}</td><td class="mw">${fmt(pctEf,1)}%</td></tr>`;
+    }).join('');
+  const totalPct = '100.0%';
+  document.getElementById('techTable').innerHTML = `<table class="tech">
+    <thead><tr><th>Tecnología</th><th class="mw">MW</th><th class="mw">% EF</th></tr></thead>
+    <tbody>${techRows}</tbody>
+    <tfoot><tr style="border-top:2px solid var(--guinda);font-weight:700;background:#faf3f5">
+      <td>TOTAL</td><td class="mw">${fmt(totalMW,1)}</td><td class="mw">${totalPct}</td>
+    </tr></tfoot>
+  </table>`;
+
+  // Top N (10 + caption con total)
+  const sorted = [...rows].sort((a,b) => b.mw-a.mw);
+  const top = sorted.slice(0,10);
+  const remaining = sorted.length - top.length;
+  const remainingMW = sorted.slice(10).reduce((s,r)=>s+r.mw,0);
+  const extraRow = remaining > 0
+    ? `<tr style="background:#f7f7f8;font-style:italic"><td colspan="4">+ ${remaining} proyectos restantes</td><td class="mw">${fmt(remainingMW,0)}</td><td>—</td></tr>`
+    : '';
+  document.getElementById('topPanelTitle').textContent = isProject ? 'Ficha del proyecto seleccionado' : 'Top 10 proyectos por capacidad instalada';
+  const projectFicha = isProject && rows.length ? `
+    <table class="proyectos">
+      <tbody>
+        <tr><th>Nombre real</th><td>${rows[0].nombre || '—'}</td><th class="mw">MW</th><td class="mw">${fmt(totalMW,1)}</td></tr>
+        <tr><th>Entidad Federativa</th><td>${rows[0].ef || '—'}</td><th>Municipio</th><td>${rows[0].municipio || '—'}</td></tr>
+        <tr><th>Año</th><td>${yMin || '—'}</td><th>Mes</th><td>${rows[0].mes || '—'}</td></tr>
+        <tr><th>Estatus</th><td>${rows[0].status || '—'}</td><th>Firme</th><td>${firmes.length ? 'Sí' : 'No'}</td></tr>
+        <tr><th>Tipo</th><td>${[...new Set(rows.map(r => r.tipo).filter(Boolean))].join(', ') || '—'}</td><th>Renovable</th><td>${[...new Set(rows.map(r => r.renovable).filter(Boolean))].join(', ') || '—'}</td></tr>
+        <tr><th>Contrato/unidad</th><td>${[...new Set(rows.map(r => r.contratoUnidad).filter(Boolean))].join(', ') || '—'}</td><th>Adición/sustitución</th><td>${[...new Set(rows.map(r => r.adicion).filter(Boolean))].join(', ') || '—'}</td></tr>
+        <tr><th>Gerencia de control</th><td>${rows[0].gerencia || '—'}</td><th>Región de transmisión</th><td>${rows[0].region || '—'}</td></tr>
+      </tbody>
+    </table>` : '';
+  document.getElementById('topTable').innerHTML = projectFicha || `<table class="proyectos">
+    <thead><tr><th>Proyecto</th><th>Año</th><th>Municipio</th><th>Tipo</th><th class="mw">MW</th><th>Estatus</th></tr></thead>
+    <tbody>${top.map(r => `<tr><td>${r.nombre}</td><td>${r.anio}</td><td>${r.municipio||'—'}</td><td>${r.tipo}</td><td class="mw">${fmt(r.mw,0)}</td><td>${r.status}</td></tr>`).join('')}${extraRow}</tbody>
+  </table>`;
+
+  // Donut by status
+  const donutData = Object.entries(stats).map(([k,v]) => ({ name: k, y: +v.toFixed(1) }));
+  Highcharts.chart('chartDonut', {
+    chart: { type: 'pie', backgroundColor: 'transparent' },
+    plotOptions: { pie: { innerSize: '60%', borderWidth: 1, dataLabels: { enabled: true, style: { fontSize: '9px' }, format: '<b>{point.name}</b><br>{point.percentage:.1f}% · {point.y:.0f} MW' } } },
+    series: [{ name: 'MW', data: donutData }],
+    tooltip: { pointFormat: '<b>{point.y:.1f} MW</b> ({point.percentage:.1f}%)' }
+  });
+
+  // Horizontal bar capacity stacked
+  Highcharts.chart('chartBar', {
+    chart: { type: 'bar', backgroundColor: 'transparent' },
+    xAxis: { categories: [ef], labels: { style: { fontSize: '9px' } } },
+    yAxis: { title: { text: 'MW', style: { fontSize: '9px' } }, labels: { style: { fontSize: '9px' } } },
+    legend: { itemStyle: { fontSize: '9px' } },
+    plotOptions: { bar: { stacking: 'normal', borderWidth: 0, dataLabels: { enabled: true, style: { fontSize: '8px', fontWeight: 'bold' }, formatter: function() { return this.y > 50 ? Math.round(this.y) : ''; } } } },
+    series: allTipos.map(t => ({ name: t, data: [+rows.filter(r=>r.tipo===t).reduce((s,r)=>s+r.mw,0).toFixed(1)] }))
+  });
+}
+
+// =================== MAPA ===================
+const GEOJSON_URL = 'https://cdn.sassoapps.com/Mapas/Electricidad/estados.geojson';
+let mapInstance = null, geoLayer = null, geoData = null;
+const RAMP = ['#f7e3ea', '#e6b8c9', '#d28aa6', '#b85979', '#9B2247', '#6a172f'];
+
+// Catálogo de aliases EF: clave normalizada (cualquier variante) -> nombre canónico CSV
+const EF_ALIAS = {
+  'mexico': 'Estado de México',
+  'estadodemexico': 'Estado de México',
+  'edomex': 'Estado de México',
+  'coahuila': 'Coahuila de Zaragoza',
+  'coahuiladezaragoza': 'Coahuila de Zaragoza',
+  'veracruz': 'Veracruz de Ignacio de la Llave',
+  'veracruzdeignaciodelallave': 'Veracruz de Ignacio de la Llave',
+  'michoacan': 'Michoacán de Ocampo',
+  'michoacandeocampo': 'Michoacán de Ocampo',
+  'cdmx': 'Ciudad de México',
+  'ciudaddemexico': 'Ciudad de México',
+  'distritofederal': 'Ciudad de México',
+  'df': 'Ciudad de México',
+  'bajacalifornia': 'Baja California',
+  'bajacaliforniasur': 'Baja California Sur',
+  'bcs': 'Baja California Sur',
+  'bc': 'Baja California',
+  'nuevoleon': 'Nuevo León',
+  'sanluispotosi': 'San Luis Potosí',
+  'slp': 'San Luis Potosí',
+  'quintanaroo': 'Quintana Roo'
+};
+
+function normEf(s) {
+  return (s || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/^estado de /, '')
+    .replace(/ de zaragoza| de ignacio de la llave| de la llave| de hidalgo| de arteaga| de juarez| de ocampo/g, '')
+    .replace(/[^a-z]/g, '').trim();
+}
+
+// Resuelve nombre del geo a EF canónico del CSV
+function resolveEf(geoName, csvIndex) {
+  const n = normEf(geoName);
+  // 1. match directo en index del CSV
+  if (csvIndex[n]) return csvIndex[n];
+  // 2. alias explícito
+  if (EF_ALIAS[n] && csvIndex[normEf(EF_ALIAS[n])]) return EF_ALIAS[n];
+  // 3. devuelve el nombre tal cual (no match)
+  return geoName;
+}
+
+function getEfNameFromFeature(f) {
+  const p = f.properties || {};
+  return p.NOM_ENT || p.NOMGEO || p.ENTIDAD || p.nom_ent || p.estado || p.name || p.NAME || '';
+}
+
+function metricForEf(ef, metric, tipo) {
+  let rows = activeDataForMap().filter(r => r.ef === ef);
+  if (tipo && tipo !== '__ALL__') rows = rows.filter(r => r.tipo === tipo);
+  switch(metric) {
+    case 'proyectos': return rows.length;
+    case 'firmesMW': return rows.filter(r => r.firme).reduce((s,r)=>s+r.mw, 0);
+    case 'renovableMW': return rows.filter(r => /renov/i.test(r.renovable)).reduce((s,r)=>s+r.mw, 0);
+    case 'capacidad':
+    default: return rows.reduce((s,r) => s + r.mw, 0);
+  }
+}
+
+function colorScale(value, min, max) {
+  if (max === min || value <= 0) return '#f4f6f8';
+  const t = (value - min) / (max - min);
+  const idx = Math.min(RAMP.length - 1, Math.floor(t * RAMP.length));
+  return RAMP[idx];
+}
+
+async function loadMap() {
+  if (geoData) return geoData;
+  const r = await fetch(GEOJSON_URL);
+  geoData = await r.json();
+  return geoData;
+}
+
+async function initMap() {
+  await loadMap();
+  if (!mapInstance) {
+    mapInstance = L.map('mapa', { zoomControl: true, attributionControl: false, preferCanvas: true });
+    mapInstance.setView([24, -102], 4.5);
+  }
+  populateMapTipoSelect();
+  drawMap();
+  document.getElementById('mapMetric').addEventListener('change', drawMap);
+  document.getElementById('mapTipo').addEventListener('change', drawMap);
+}
+
+function populateMapTipoSelect() {
+  const tipos = [...new Set(activeDataForMap().map(r => r.tipo).filter(Boolean))].sort();
+  const selT = document.getElementById('mapTipo');
+  const current = selT.value || '__ALL__';
+  selT.innerHTML = '<option value="__ALL__">Todas</option>' + tipos.map(t => `<option>${t}</option>`).join('');
+  selT.value = [...selT.options].some(o => o.value === current) ? current : '__ALL__';
+}
+
+let CURRENT_FOCUS_EF = null; // null = nacional
+
+function drawMap() {
+  const metric = document.getElementById('mapMetric').value;
+  const tipo = document.getElementById('mapTipo').value;
+  const efIndex = {};
+  [...new Set(DATA.map(r => r.ef))].forEach(ef => { efIndex[normEf(ef)] = ef; });
+
+  const values = {};
+  geoData.features.forEach(f => {
+    const geoName = getEfNameFromFeature(f);
+    const matchedEf = resolveEf(geoName, efIndex);
+    values[geoName] = { ef: matchedEf, value: metricForEf(matchedEf, metric, tipo) };
+  });
+  const allVals = Object.values(values).map(v => v.value).filter(v => v > 0);
+  const min = Math.min(...allVals, 0);
+  const max = Math.max(...allVals, 1);
+
+  const focusNorm = CURRENT_FOCUS_EF ? normEf(CURRENT_FOCUS_EF) : null;
+
+  if (geoLayer) mapInstance.removeLayer(geoLayer);
+  geoLayer = L.geoJSON(geoData, {
+    style: f => {
+      const geoName = getEfNameFromFeature(f);
+      const v = values[geoName];
+      const isFocus = focusNorm && normEf(geoName) === focusNorm;
+      if (focusNorm && !isFocus) {
+        return { fillColor: '#e8e8ea', weight: 0.4, color: '#bbb', fillOpacity: 0.25, opacity: 0.4 };
+      }
+      return {
+        fillColor: colorScale(v?.value || 0, min, max),
+        weight: isFocus ? 2.5 : 0.8,
+        color: isFocus ? '#9B2247' : '#666',
+        fillOpacity: 0.88,
+        opacity: 1
+      };
+    },
+    onEachFeature: (f, lyr) => {
+      const geoName = getEfNameFromFeature(f);
+      const v = values[geoName];
+      const ef = v?.ef || geoName;
+      const fmtV = metric === 'proyectos' ? (v?.value || 0) : fmt(v?.value || 0, 1) + ' MW';
+      lyr.bindTooltip(`<strong>${ef}</strong>${fmtV}`, { className: 'ef-tip', sticky: true });
+      lyr.on('mouseover', () => {
+        if (focusNorm && normEf(geoName) !== focusNorm) return;
+        lyr.setStyle({ weight: 2.5, color: '#9B2247' });
+      });
+      lyr.on('mouseout', () => geoLayer.resetStyle(lyr));
+      lyr.on('click', () => showEfDetail(ef));
+      lyr.on('dblclick', () => {
+        const sel = document.getElementById('efSelect');
+        if ([...sel.options].some(o => o.value === ef || o.textContent === ef)) {
+          sel.value = ef; render();
+        }
+      });
+    }
+  }).addTo(mapInstance);
+
+  // zoom: focus → fit selected; nacional → full bounds
+  try {
+    if (focusNorm) {
+      const focusFeat = geoData.features.find(f => normEf(getEfNameFromFeature(f)) === focusNorm);
+      if (focusFeat) {
+        const tmp = L.geoJSON(focusFeat);
+        mapInstance.fitBounds(tmp.getBounds(), { padding: [20,20] });
+      }
+    } else {
+      mapInstance.fitBounds(geoLayer.getBounds(), { padding: [10,10] });
+    }
+  } catch(e) {}
+
+  // toolbar + title + body class swap
+  const slideEl = document.querySelector('.map-slide');
+  const titleEl = document.getElementById('mapSlideTitle');
+  const tbN = document.getElementById('mapToolbarNacional');
+  const tbE = document.getElementById('mapToolbarEf');
+  if (CURRENT_FOCUS_EF) {
+    slideEl.classList.add('focused');
+    titleEl.textContent = `${CURRENT_FOCUS_EF} — detalle`;
+    tbN.style.display = 'none';
+    tbE.style.display = 'flex';
+    document.getElementById('mapEfBadge').textContent = CURRENT_FOCUS_EF;
+  } else {
+    slideEl.classList.remove('focused');
+    titleEl.textContent = 'Vista nacional';
+    tbN.style.display = 'flex';
+    tbE.style.display = 'none';
+  }
+
+  if (CURRENT_FOCUS_EF) showEfDetail(CURRENT_FOCUS_EF);
+  else showNacionalSummary(metric, tipo, min, max, values);
+}
+
+function showNacionalSummary(metric, tipo, min, max, values) {
+  const total = Object.values(values).reduce((s,v) => s + (v.value||0), 0);
+  const ranked = Object.values(values).filter(v => v.value > 0).sort((a,b) => b.value - a.value);
+  const top5 = ranked.slice(0, 5);
+  const tipoLbl = tipo === '__ALL__' ? 'todas las tecnologías' : tipo;
+  const metricLbl = { capacidad:'MW capacidad instalada', proyectos:'proyectos', firmesMW:'MW firmes', renovableMW:'MW renovables' }[metric];
+  document.getElementById('mapEfTitle').textContent = 'Vista nacional';
+  document.getElementById('mapHint').style.display = '';
+  document.getElementById('mapHint').textContent = `Métrica: ${metricLbl} · ${tipoLbl}. Click una entidad para detalle.`;
+  document.getElementById('mapStats').innerHTML = `
+    <div class="stat"><span>Total nacional</span><strong>${metric==='proyectos'? total : fmt(total,1)+' MW'}</strong></div>
+    <div class="stat"><span>Entidades con datos</span><strong>${ranked.length}</strong></div>
+    <div class="stat"><span>Máximo</span><strong>${ranked[0]?.ef||'—'}</strong></div>
+    <div class="stat"><span>Mínimo (>0)</span><strong>${ranked[ranked.length-1]?.ef||'—'}</strong></div>
+    <div style="margin-top:8px;font-size:11px;font-weight:700;color:var(--text);letter-spacing:.1em;text-transform:uppercase">Top 5</div>
+    ${top5.map((v,i) => `<div class="stat"><span>${i+1}. ${v.ef}</span><strong>${metric==='proyectos'? v.value : fmt(v.value,0)+' MW'}</strong></div>`).join('')}
+  `;
+}
+
+function showEfDetail(ef) {
+  const rows = activeDataForMap().filter(r => r.ef === ef);
+  document.getElementById('mapEfTitle').textContent = ef;
+  if (!rows.length) {
+    document.getElementById('mapHint').style.display = '';
+    document.getElementById('mapHint').textContent = 'Sin proyectos en esta entidad.';
+    document.getElementById('mapStats').innerHTML = '';
+    return;
+  }
+  const totalMW = rows.reduce((s,r)=>s+r.mw, 0);
+  const firmes = rows.filter(r => r.firme);
+  const firmesMW = firmes.reduce((s,r)=>s+r.mw,0);
+  const ren = rows.filter(r => /renov/i.test(r.renovable)).reduce((s,r)=>s+r.mw, 0);
+  const noRen = totalMW - ren;
+
+  const nacionalMW = activeDataForMap().reduce((s,r) => s + r.mw, 0);
+  const pctNal = nacionalMW ? (totalMW/nacionalMW*100) : 0;
+
+  const tipos = {};
+  rows.forEach(r => { tipos[r.tipo] = (tipos[r.tipo]||0) + r.mw; });
+  const tiposSorted = Object.entries(tipos).sort((a,b)=>b[1]-a[1]);
+  const maxTipoMW = tiposSorted[0]?.[1] || 1;
+
+  const stats = {};
+  rows.forEach(r => { stats[r.status] = (stats[r.status]||0) + r.mw; });
+  const statsSorted = Object.entries(stats).sort((a,b)=>b[1]-a[1]);
+
+  const munis = {};
+  rows.forEach(r => { if (r.municipio) munis[r.municipio] = (munis[r.municipio]||0) + r.mw; });
+  const munisSorted = Object.entries(munis).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  const years = rows.map(r=>r.anio).filter(Boolean);
+  const horizonte = `${Math.min(...years)}–${Math.max(...years)}`;
+
+  const byYear = {};
+  rows.forEach(r => { byYear[r.anio] = (byYear[r.anio]||0) + r.mw; });
+  const yearsSorted = Object.keys(byYear).sort();
+  const maxYearMW = Math.max(...Object.values(byYear), 1);
+
+  document.getElementById('mapHint').style.display = 'none';
+  document.getElementById('mapStats').innerHTML = `
+    <div class="ef-detail-grid">
+      <div class="ef-mini-card"><div class="lbl">Capacidad instalada</div><div class="val">${fmt(totalMW,1)}</div><div class="sub">MW · ${fmt(pctNal,2)}% nacional</div></div>
+      <div class="ef-mini-card"><div class="lbl">Proyectos</div><div class="val">${rows.length}</div><div class="sub">${firmes.length} firmes</div></div>
+      <div class="ef-mini-card"><div class="lbl">Renovable</div><div class="val">${fmt(ren/totalMW*100,1)}%</div><div class="sub">${fmt(ren,0)} MW</div></div>
+      <div class="ef-mini-card"><div class="lbl">Horizonte</div><div class="val" style="font-size:14px">${horizonte}</div><div class="sub">${yearsSorted.length} años</div></div>
+    </div>
+
+    <div class="ef-section-title">Tecnologías</div>
+    ${tiposSorted.map(([t,m]) => `
+      <div class="ef-bar-row">
+        <span class="name">${t}</span>
+        <span class="bar"><span style="width:${(m/maxTipoMW*100).toFixed(1)}%"></span></span>
+        <span class="num">${fmt(m,0)} MW</span>
+      </div>`).join('')}
+
+    <div class="ef-section-title">Estatus / participación</div>
+    ${statsSorted.map(([s,m]) => `
+      <div class="ef-bar-row">
+        <span class="name" style="width:auto;flex:0 0 auto;font-size:9.5px;letter-spacing:0">${s}</span>
+        <span class="bar"><span style="width:${(m/totalMW*100).toFixed(1)}%;background:var(--verde)"></span></span>
+        <span class="num">${fmt(m/totalMW*100,1)}%</span>
+      </div>`).join('')}
+
+    <div class="ef-section-title">MW programados por año</div>
+    ${yearsSorted.map(y => `
+      <div class="ef-bar-row">
+        <span class="name">${y}</span>
+        <span class="bar"><span style="width:${(byYear[y]/maxYearMW*100).toFixed(1)}%;background:var(--dorado)"></span></span>
+        <span class="num">${fmt(byYear[y],0)} MW</span>
+      </div>`).join('')}
+
+    ${munisSorted.length ? `<div class="ef-section-title">Top 5 municipios</div>
+    ${munisSorted.map(([m,v],i) => `
+      <div class="ef-bar-row">
+        <span class="name" style="width:auto;flex:1;text-align:left;font-weight:600;font-size:10.5px">${i+1}. ${m}</span>
+        <span class="num">${fmt(v,0)} MW</span>
+      </div>`).join('')}` : ''}
+  `;
+}
+
+document.getElementById('efSelect').addEventListener('change', () => {
+  populateProjectSelect();
+  render();
+});
+document.getElementById('statusSelect').addEventListener('change', () => {
+  populateProjectSelect();
+  render();
+});
+document.getElementById('projectSelect').addEventListener('change', () => {
+  const rows = selectedProjectRows();
+  if (rows?.length) document.getElementById('efSelect').value = rows[0].ef;
+  populateProjectSelect();
+  render();
+});
+document.getElementById('mapClearEf').addEventListener('click', () => {
+  document.getElementById('efSelect').value = '__ALL__';
+  document.getElementById('projectSelect').value = '__ALL__';
+  render();
+});
+
+// =================== EXPORT PPT ===================
+const _imgCache = {};
+async function urlToDataURL(url) {
+  if (_imgCache[url]) return _imgCache[url];
+  const r = await fetch(url, { mode: 'cors' });
+  const blob = await r.blob();
+  return _imgCache[url] = await new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function inlineRemoteAssets() {
+  const imgs = document.querySelectorAll('img[src^="http"]');
+  for (const img of imgs) {
+    if (img.src.startsWith('data:')) continue;
+    try {
+      const data = await urlToDataURL(img.src);
+      img.dataset.origSrc = img.src;
+      img.src = data;
+    } catch (e) { console.warn('inline img fail', img.src, e.message); }
+  }
+  // bg-image en .cover
+  const cover = document.querySelector('.slide.cover');
+  if (cover && !cover.dataset.bgInlined) {
+    const bg = getComputedStyle(cover).backgroundImage;
+    const m = bg.match(/url\(["']?(https?:[^"')]+)/);
+    if (m) {
+      try {
+        const data = await urlToDataURL(m[1]);
+        cover.style.backgroundImage = bg.replace(m[1], data);
+        cover.dataset.bgInlined = '1';
+      } catch (e) { console.warn('inline bg fail', e.message); }
+    }
+  }
+}
+
+async function captureSlide(slideEl) {
+  if (slideEl.querySelector('#mapa') && mapInstance) {
+    mapInstance.invalidateSize();
+    await new Promise(r => setTimeout(r, 400));
+  }
+  const canvas = await html2canvas(slideEl, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+    width: slideEl.offsetWidth,
+    height: slideEl.offsetHeight
+  });
+  return canvas.toDataURL('image/png');
+}
+
+async function exportPPT() {
+  const btn = document.getElementById('btnPpt');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Generando…';
+  try {
+    btn.textContent = 'Preparando imágenes…';
+    await inlineRemoteAssets();
+
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE'; // 13.333 x 7.5 in
+    pptx.author = 'DGMESNIE — SENER';
+    pptx.company = 'Secretaría de Energía';
+    pptx.title = 'PVIRCE 2026-2040';
+
+    const slides = document.querySelectorAll('.deck > .slide');
+    for (let i = 0; i < slides.length; i++) {
+      btn.textContent = `Slide ${i+1}/${slides.length}…`;
+      const dataUrl = await captureSlide(slides[i]);
+      const slide = pptx.addSlide();
+      slide.background = { color: 'FFFFFF' };
+      slide.addImage({ data: dataUrl, x: 0, y: 0, w: 13.333, h: 7.5 });
+    }
+
+    const fname = `${getReportBaseName()}.pptx`;
+    await pptx.writeFile({ fileName: fname });
+    btn.textContent = '✓ Descargado';
+    setTimeout(() => { btn.textContent = originalLabel; btn.disabled = false; }, 2000);
+  } catch (e) {
+    console.error(e);
+    alert('Error generando PPT: ' + e.message);
+    btn.textContent = originalLabel;
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnPpt').addEventListener('click', exportPPT);
+setStatus('Iniciando…');
+if (typeof Papa === 'undefined') {
+  setStatus('ERROR: PapaParse no cargó (sandbox iframe bloquea CDN). Abre el HTML directo en navegador.');
+} else {
+  loadData().catch(e => setStatus('Error cargando datos: ' + e.message));
+}
+</script>
+
+</body>
+</html>

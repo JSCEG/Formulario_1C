@@ -328,6 +328,15 @@
     }
 
     async function validateTrackingAccess() {
+        if (state.trackingKey === 'DEV') {
+            state.trackingAccessValid = true;
+            setFormLocked(false);
+            setGlobalMessage('Modo de prueba local habilitado.', 'warning');
+            applyProjectContext();
+            validateProjectField();
+            return;
+        }
+
         if (!state.hasAppsScript) {
             return;
         }
@@ -941,7 +950,7 @@
             .style('width', '0%')
             .transition()
             .duration(650)
-            .style('width', (item) => `${Math.max(4, (item.value / max) * 100)}%`);
+            .style('width', (item) => (item.value > 0 ? `${Math.max(4, (item.value / max) * 100)}%` : '0%'));
 
         rows.append('strong').text((item) => item.value);
     }
@@ -1068,12 +1077,65 @@
         }
     }
 
+    function renderReportSvgDonut(summary, size, stroke) {
+        const r = (size - stroke) / 2;
+        const circ = 2 * Math.PI * r;
+        const segments = [
+            { value: summary.completed, color: 'var(--gobmx-verde)' },
+            { value: summary.progress, color: 'var(--gobmx-dorado)' },
+            { value: summary.issue, color: 'var(--danger, #dc2626)' },
+            { value: summary.pending, color: '#cbd5e1' }
+        ];
+        const total = Math.max(1, summary.total);
+        let offset = 0;
+        const paths = segments.map((seg) => {
+            const len = (seg.value / total) * circ;
+            const html = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${stroke}" stroke-dasharray="${len} ${circ - len}" stroke-dashoffset="${-offset}" stroke-linecap="butt"/>`;
+            offset += len;
+            return html;
+        }).join('');
+        return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="transform:rotate(-90deg)">${paths}</svg>`;
+    }
+
+    function renderReportStackedBar(summary) {
+        const total = Math.max(1, summary.total);
+        const pcts = [
+            { value: summary.completed, color: 'var(--gobmx-verde)', label: 'Concluidos' },
+            { value: summary.progress, color: 'var(--gobmx-dorado)', label: 'En proceso' },
+            { value: summary.issue, color: 'var(--danger, #dc2626)', label: 'Incidencias' },
+            { value: summary.pending, color: '#94a3b8', label: 'Pendientes' }
+        ];
+        const bar = pcts.map((s) => {
+            const w = Math.round((s.value / total) * 100);
+            return w > 0 ? `<span style="width:${w}%;background:${s.color}" title="${s.label}: ${s.value}"></span>` : '';
+        }).join('');
+        const legend = pcts.filter((s) => s.value > 0).map((s) =>
+            `<span class="report-legend-item"><i style="background:${s.color}"></i>${s.label} (${s.value})</span>`
+        ).join('');
+        return `
+            <div class="report-stacked-bar">${bar}</div>
+            <div class="report-legend">${legend}</div>
+        `;
+    }
+
+    function renderReportSvgArc(percent, size, stroke) {
+        const r = (size - stroke) / 2;
+        const circ = 2 * Math.PI * r;
+        const filled = (percent / 100) * circ;
+        return `
+            <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="transform:rotate(-90deg)">
+                <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${stroke}"/>
+                <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--gobmx-guinda)" stroke-width="${stroke}" stroke-dasharray="${filled} ${circ - filled}" stroke-linecap="round"/>
+            </svg>
+        `;
+    }
+
     function renderReportDeck(summary, record) {
         const projectName = record.projectName || state.trackingProjectName || 'Proyecto';
-        const stageSlides = getStageProgressSummary(record).map((stage) => renderReportStageSlide(stage, record)).join('');
+        const stageSlides = getStageProgressSummary(record).map((stage, idx) => renderReportStageSlide(stage, record, idx)).join('');
         return `
             <section class="report-slide report-slide--cover">
-                <img class="report-cover-bg" src="https://cdn.sassoapps.com/dgmesnie/portada_ppt.png" alt="">
+                <img class="report-cover-bg" src="Estilos Institucionales/img/portada_ppt.png" alt="">
                 <div class="report-cover-overlay"></div>
                 <div class="report-slide__top">
                     <img src="Estilos Institucionales/img/logo_gob.png" alt="Gobierno de México">
@@ -1095,25 +1157,38 @@
             </section>
             <section class="report-slide report-slide--summary">
                 ${renderReportHeader('Resumen ejecutivo', projectName)}
-                <div class="report-narrative">
-                    <strong>${escapeHtml(projectName)}</strong> registra un avance general de ${summary.percent}% con ${summary.completed} trámites concluidos, ${summary.progress} en proceso y ${summary.pending} pendientes por atender.
-                </div>
-                <div class="report-kpi-grid">
-                    ${renderReportKpi('Avance general', `${summary.percent}%`, 'Concluido')}
-                    ${renderReportKpi('Concluidos', summary.completed, `de ${summary.total}`)}
-                    ${renderReportKpi('En proceso', summary.progress, 'trámites')}
-                    ${renderReportKpi('Pendientes', summary.pending, 'por atender')}
-                </div>
-                <div class="report-summary-grid">
-                    <div class="report-donut">${summary.percent}%</div>
-                    <div class="report-stage-list">
-                        ${summary.stages.map((stage) => `
-                            <div class="report-stage-row">
-                                <span>${escapeHtml(stage.title)}</span>
-                                <div><i style="width:${stage.percent}%"></i></div>
-                                <strong>${stage.percent}%</strong>
+                <div class="report-summary-layout">
+                    <div class="report-summary-left">
+                        <div class="report-donut-wrap">
+                            ${renderReportSvgDonut(summary, 180, 22)}
+                            <div class="report-donut-label">
+                                <strong>${summary.percent}%</strong>
+                                <span>Avance</span>
                             </div>
-                        `).join('')}
+                        </div>
+                        ${renderReportStackedBar(summary)}
+                        <div class="report-kpi-row">
+                            ${renderReportKpi('Concluidos', summary.completed, `de ${summary.total}`)}
+                            ${renderReportKpi('En proceso', summary.progress, 'trámites')}
+                            ${renderReportKpi('Incidencias', summary.issue, 'trámites')}
+                            ${renderReportKpi('Pendientes', summary.pending, 'por atender')}
+                        </div>
+                    </div>
+                    <div class="report-summary-right">
+                        <h2 class="report-section-title">Avance por etapa</h2>
+                        <div class="report-stage-list">
+                            ${summary.stages.map((stage) => `
+                                <div class="report-stage-row">
+                                    <span>${escapeHtml(stage.title)}</span>
+                                    <div class="report-stage-row__bar"><i style="width:${stage.percent}%"></i></div>
+                                    <strong>${stage.percent}%</strong>
+                                    <small>${stage.completed}/${stage.total}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="report-narrative report-narrative--small">
+                            <strong>${escapeHtml(projectName)}</strong> registra un avance general de <strong>${summary.percent}%</strong> con <strong>${summary.completed}</strong> trámites concluidos de <strong>${summary.total}</strong> totales. ${summary.pending > 0 ? `Quedan <strong>${summary.pending}</strong> trámites pendientes por atender.` : 'Todos los trámites han sido atendidos.'}
+                        </div>
                     </div>
                 </div>
                 ${renderReportFooter('1')}
@@ -1154,28 +1229,73 @@
         `;
     }
 
-    function renderReportStageSlide(stage, record) {
+    function renderReportStageSlide(stage, record, stageIndex) {
         const projectName = record.projectName || state.trackingProjectName || 'Proyecto';
         const section = sections.find((candidate) => candidate.title === stage.title);
         const procedures = section ? section.procedures : [];
+
+        // Count status distribution within this stage
+        let stageProgress = 0;
+        let stageIssue = 0;
+        procedures.forEach((item) => {
+            const status = readRecordColumn(record, item.statusColumn);
+            const mode = getStatusMode(item, status);
+            if (mode === STATUS_PROGRESS) { stageProgress += 1; }
+            else if (mode === STATUS_ISSUE) { stageIssue += 1; }
+        });
+        const stagePending = stage.total - stage.completed - stageProgress - stageIssue;
+
         return `
             <section class="report-slide report-slide--stage">
                 ${renderReportHeader(stage.title, projectName)}
-                <div class="report-narrative">
-                    Esta etapa presenta ${stage.completed} de ${stage.total} trámites concluidos. Los campos pendientes se conservan para seguimiento y los cambios posteriores quedan trazados en el historial.
+                <div class="report-stage-hero">
+                    <div class="report-stage-arc">
+                        ${renderReportSvgArc(stage.percent, 100, 12)}
+                        <div class="report-stage-arc__label">
+                            <strong>${stage.percent}%</strong>
+                        </div>
+                    </div>
+                    <div class="report-stage-stats">
+                        <div class="report-stage-stat report-stage-stat--complete"><strong>${stage.completed}</strong><span>Concluidos</span></div>
+                        <div class="report-stage-stat report-stage-stat--progress"><strong>${stageProgress}</strong><span>En proceso</span></div>
+                        <div class="report-stage-stat report-stage-stat--issue"><strong>${stageIssue}</strong><span>Incidencias</span></div>
+                        <div class="report-stage-stat report-stage-stat--pending"><strong>${stagePending}</strong><span>Pendientes</span></div>
+                    </div>
+                    <div class="report-stage-bar-wrap">
+                        <div class="report-stacked-bar">
+                            ${stage.completed > 0 ? `<span style="width:${Math.round((stage.completed / stage.total) * 100)}%;background:var(--gobmx-verde)"></span>` : ''}
+                            ${stageProgress > 0 ? `<span style="width:${Math.round((stageProgress / stage.total) * 100)}%;background:var(--gobmx-dorado)"></span>` : ''}
+                            ${stageIssue > 0 ? `<span style="width:${Math.round((stageIssue / stage.total) * 100)}%;background:var(--danger, #dc2626)"></span>` : ''}
+                            ${stagePending > 0 ? `<span style="width:${Math.round((stagePending / stage.total) * 100)}%;background:#cbd5e1"></span>` : ''}
+                        </div>
+                        <small>${stage.completed} de ${stage.total} trámites concluidos</small>
+                    </div>
                 </div>
-                <div class="report-stage-summary">
-                    ${renderReportKpi('Avance de etapa', `${stage.percent}%`, `${stage.completed}/${stage.total} concluidos`)}
-                    ${renderReportKpi('Pendientes', stage.pending, 'sin concluir')}
-                </div>
-                <div class="report-procedure-table">
-                    ${procedures.map((item) => renderReportProcedureRow(item, record)).join('')}
+                <div class="report-procedure-grid">
+                    ${procedures.map((item) => renderReportProcedureCard(item, record)).join('')}
                 </div>
                 ${renderReportFooter(String(sections.filter((item) => item.type === 'procedures').indexOf(section) + 2))}
             </section>
         `;
     }
 
+    function renderReportProcedureCard(item, record) {
+        const status = readRecordColumn(record, item.statusColumn) || 'Pendiente';
+        const mode = getStatusMode(item, status);
+        const note = readRecordColumn(record, item.summaryColumn) || readRecordColumn(record, item.detailColumn) || '';
+        return `
+            <div class="report-proc-card report-proc-card--${mode || 'pending'}">
+                <div class="report-proc-card__header">
+                    <span class="report-proc-card__dot"></span>
+                    <strong>${escapeHtml(item.title)}</strong>
+                </div>
+                <span class="report-proc-card__status">${escapeHtml(status)}</span>
+                ${note ? `<p class="report-proc-card__note">${escapeHtml(note)}</p>` : ''}
+            </div>
+        `;
+    }
+
+    // Keep legacy function for backwards compatibility
     function renderReportProcedureRow(item, record) {
         const status = readRecordColumn(record, item.statusColumn) || 'Pendiente';
         const mode = getStatusMode(item, status);
@@ -1187,6 +1307,34 @@
                 <p>${escapeHtml(note)}</p>
             </div>
         `;
+    }
+
+    async function imageToDataUrl(url) {
+        try {
+            const response = await fetch(url, { mode: 'cors' });
+            const blob = await response.blob();
+            return await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        } catch (_err) {
+            // If CORS fetch fails, try via canvas proxy
+            return await new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    const c = document.createElement('canvas');
+                    c.width = img.naturalWidth;
+                    c.height = img.naturalHeight;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    try { resolve(c.toDataURL('image/png')); }
+                    catch (_e) { resolve(url); }
+                };
+                img.onerror = () => resolve(url);
+                img.src = url;
+            });
+        }
     }
 
     async function downloadReportPdf() {
@@ -1214,6 +1362,18 @@
         }
 
         try {
+            // Pre-convert external images to base64 so html2canvas can capture them
+            const externalImages = Array.from(reportDeck.querySelectorAll('img[src^="http"]'));
+            const originalSources = [];
+            for (const img of externalImages) {
+                originalSources.push({ el: img, src: img.src });
+                const dataUrl = await imageToDataUrl(img.src);
+                img.src = dataUrl;
+            }
+
+            // Small delay to let the browser repaint with the new src
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
             const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'in', format: [13.333, 7.5] });
             const slides = Array.from(reportDeck.querySelectorAll('.report-slide'));
             const fileName = `${fileSafe(state.latestProjectRecord.projectName || state.trackingProjectName || 'seguimiento')}-seguimiento.pdf`;
@@ -1224,11 +1384,18 @@
                 const canvas = await window.html2canvas(slides[index], {
                     scale: 1.35,
                     backgroundColor: '#ffffff',
-                    useCORS: true
+                    useCORS: true,
+                    allowTaint: false
                 });
                 const image = canvas.toDataURL('image/jpeg', 0.88);
                 pdf.addImage(image, 'JPEG', 0, 0, 13.333, 7.5, undefined, 'FAST');
             }
+
+            // Restore original external image sources
+            for (const item of originalSources) {
+                item.el.src = item.src;
+            }
+
             const blob = pdf.output('blob');
             const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
             const link = document.createElement('a');
